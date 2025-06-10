@@ -16,13 +16,13 @@
     </form>
 
     <?php
-        if (isset($_SESSION['error'])) {
-        echo "<p style='color:red'>" . $_SESSION['error'] . "</p>";
-        unset($_SESSION['error']);
-        }
+        if (isset($_GET['error']) && $_GET['error'] === 'invalid') : ?> 
+            <div style="color: red; margin-bottom:10px;">Invalid username or password.</div>
+    <?php endif; ?>
 
 
-    ?>
+
+
     
 </body>
 </html>
