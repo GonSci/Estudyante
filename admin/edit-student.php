@@ -13,6 +13,22 @@ if ($student_id <= 0) {
 
 $successMessage = "";
 
+// Fetch student data before processing POST (needed for comparison)
+$stmt = $conn->prepare("SELECT * FROM students WHERE id = ?");
+$stmt->bind_param("i", $student_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows !== 1) {
+    echo "<p class='text-danger'>Student not found.</p>";
+    include 'footer.php';
+    exit;
+}
+
+$student = $result->fetch_assoc();
+$current_username = $student['username'];
+$current_email = $student['email'];
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $first_name      = trim($_POST['first_name']);
@@ -30,60 +46,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($first_name) || empty($last_name) || empty($email) || empty($program) || empty($username)) {
         echo "<p class='text-danger'>Please fill in all required fields.</p>";
     } else {
-        // Check for duplicate username or email
-        $check = $conn->prepare("SELECT id FROM students WHERE (username = ? OR email = ?) AND id != ?");
-        $check->bind_param("ssi", $username, $email, $student_id);
-        $check->execute();
-        $check_result = $check->get_result();
+        // Only check for duplicates if username or email has changed
+        if ($username !== $current_username || $email !== $current_email) {
+            $check = $conn->prepare("SELECT id FROM students WHERE (username = ? OR email = ?) AND id != ?");
+            $check->bind_param("ssi", $username, $email, $student_id);
+            $check->execute();
+            $check_result = $check->get_result();
 
-        if ($check_result->num_rows > 0) {
-            echo "<p class='text-danger'>Username or Email is already taken by another student.</p>";
-        } else {
-            if (!empty($password)) {
-                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $conn->prepare("UPDATE students SET 
-                    first_name = ?, last_name = ?, date_of_birth = ?, address = ?, contact_number = ?, 
-                    email = ?, program = ?, enrollment_year = ?, semester = ?, username = ?, password = ?
-                    WHERE id = ?");
-                $stmt->bind_param("sssssssssssi",
-                    $first_name, $last_name, $date_of_birth, $address, $contact_number,
-                    $email, $program, $enrollment_year, $semester, $username, $hashedPassword, $student_id
-                );
-            } else {
-                $stmt = $conn->prepare("UPDATE students SET 
-                    first_name = ?, last_name = ?, date_of_birth = ?, address = ?, contact_number = ?, 
-                    email = ?, program = ?, enrollment_year = ?, semester = ?, username = ?
-                    WHERE id = ?");
-                $stmt->bind_param("ssssssssssi",
-                    $first_name, $last_name, $date_of_birth, $address, $contact_number,
-                    $email, $program, $enrollment_year, $semester, $username, $student_id
-                );
-            }
-
-            if ($stmt->execute()) {
-                header("Location: manage-students.php?updated=1");
+            if ($check_result->num_rows > 0) {
+                echo "<p class='text-danger'>Username or Email is already taken by another student.</p>";
+                $check_result->free_result();
+                $check->close();
                 exit;
-            } else {
-                echo "<p class='text-danger'>Update failed: " . $stmt->error . "</p>";
             }
+            $check_result->free_result();
+            $check->close();
+        }
+
+        // Proceed to update
+        if (!empty($password)) {
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $conn->prepare("UPDATE students SET 
+                first_name = ?, last_name = ?, date_of_birth = ?, address = ?, contact_number = ?, 
+                email = ?, program = ?, enrollment_year = ?, semester = ?, username = ?, password = ?
+                WHERE id = ?");
+            $stmt->bind_param("sssssssssssi",
+                $first_name, $last_name, $date_of_birth, $address, $contact_number,
+                $email, $program, $enrollment_year, $semester, $username, $hashedPassword, $student_id
+            );
+        } else {
+            $stmt = $conn->prepare("UPDATE students SET 
+                first_name = ?, last_name = ?, date_of_birth = ?, address = ?, contact_number = ?, 
+                email = ?, program = ?, enrollment_year = ?, semester = ?, username = ?
+                WHERE id = ?");
+            $stmt->bind_param("ssssssssssi",
+                $first_name, $last_name, $date_of_birth, $address, $contact_number,
+                $email, $program, $enrollment_year, $semester, $username, $student_id
+            );
+        }
+
+        if ($stmt->execute()) {
+            header("Location: manage-students.php?updated=1");
+            exit;
+        } else {
+            echo "<p class='text-danger'>Update failed: " . $stmt->error . "</p>";
         }
     }
-}
-
-// Fetch student data if not already set
-if (!isset($student)) {
-    $stmt = $conn->prepare("SELECT * FROM students WHERE id = ?");
-    $stmt->bind_param("i", $student_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows !== 1) {
-        echo "<p class='text-danger'>Student not found.</p>";
-        include 'footer.php';
-        exit;
-    }
-
-    $student = $result->fetch_assoc();
 }
 
 include 'header.php';
@@ -145,12 +153,11 @@ include 'header.php';
     <a href="manage-students.php" class="btn btn-secondary">Back</a>
 </form>
 
-
 <script>
 document.getElementById('editStudentForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // Prevent default submission
+    e.preventDefault();
 
-    const form = this; // 🔑 Save the form reference
+    const form = this;
 
     Swal.fire({
         title: "Do you want to save the changes?",
@@ -167,15 +174,13 @@ document.getElementById('editStudentForm').addEventListener('submit', function(e
                 showConfirmButton: false,
                 timer: 1500
             }).then(() => {
-                form.submit(); // ✅ Correct way to submit the form
+                form.submit();
             });
         } else if (result.isDenied) {
             Swal.fire('Changes are not saved', '', 'info');
         }
     });
 });
-
 </script>
-
 
 <?php include 'footer.php'; ?>
