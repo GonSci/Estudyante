@@ -45,4 +45,6 @@ if (!$result) {
     </tbody>
 </table>
 
+
+
 <?php include 'footer.php'; ?>
