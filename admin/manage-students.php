@@ -38,13 +38,44 @@ if (!$result) {
             <td><?= $row['program']; ?></td>
             <td>
                 <a href="edit-student.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-primary">Edit</a>
-                <a href="delete-student.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this student?');">Delete</a>
+                <a 
+                    href="delete-student.php?id=<?= $row['id']; ?>" 
+                    class="btn btn-sm btn-danger delete-btn"
+                    data-name="<?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?>"
+                    data-id="<?= $row['id']; ?>"
+                >Delete</a>
             </td>
         </tr>
         <?php endwhile; ?>
     </tbody>
 </table>
 
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = this.getAttribute('href');
+            const name = this.getAttribute('data-name');
+            const id = this.getAttribute('data-id');
+            Swal.fire({
+                title: 'Are you sure?',
+                html: `This action will permanently remove the student <b>${name} (ID: ${id})</b> from the system. Do you want to continue?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        });
+    });
+});
+</script>
 
 <?php include 'footer.php'; ?>
