@@ -4,20 +4,22 @@
 <h3>Manage Students</h3>
 
 <?php
-// Fetch students from the database
+// Assuming $conn is a MySQLi object from db.php
 $query = "SELECT * FROM students";
-$result = mysqli_query($conn, $query);
+$result = $conn->query($query);
 
 if (!$result) {
-    echo "<p class='text-danger'>Failed to retrieve students: " . mysqli_error($conn) . "</p>";
+    echo "<p class='text-danger'>Failed to retrieve students: " . $conn->error . "</p>";
     include 'footer.php';
     exit;
 }
 ?>
 
+<!-- Student Button -->
+<a href="add-student.php" class="btn btn-sm btn-success mb-2">Add student</a>
+
 <!-- Student Table -->
-<table class="table table-bordered table-striped">
-    <button class="btn btn-sm btn-success"><a href="add-student.php" class="nav-link text-white">Add student</a></button>
+<table class="table table-bordered">
     <thead>
         <tr>
             <th>ID</th>
@@ -28,7 +30,7 @@ if (!$result) {
         </tr>
     </thead>
     <tbody>
-        <?php while ($row = mysqli_fetch_assoc($result)): ?>
+        <?php while ($row = $result->fetch_assoc()): ?>
         <tr>
             <td><?= $row['id']; ?></td>
             <td><?= $row['first_name'] . " " . $row['last_name']; ?></td>

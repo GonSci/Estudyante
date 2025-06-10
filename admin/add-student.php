@@ -28,20 +28,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql = "INSERT INTO students 
                 (first_name, last_name, date_of_birth, address, contact_number, email, program, enrollment_year, semester, username, password, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-        $stmt = mysqli_prepare($conn, $sql);
+        $stmt = $conn->prepare($sql);
         if (!$stmt) {
-            echo "<p class='text-danger'>Prepare failed: " . mysqli_error($conn) . "</p>";
+            echo "<p class='text-danger'>Prepare failed: " . $conn->error . "</p>";
         } else {
-            mysqli_stmt_bind_param($stmt, 'sssssssssss',
+            $stmt->bind_param(
+                'sssssssssss',
                 $first_name, $last_name, $date_of_birth, $address, $contact_number,
                 $email, $program, $enrollment_year, $semester, $username, $password
             );
-            if (mysqli_stmt_execute($stmt)) {
+            if ($stmt->execute()) {
                 header("Location: manage-students.php?success=1");
                 exit;
             } else {
-                echo "<p class='text-danger'>Execute failed: " . mysqli_stmt_error($stmt) . "</p>";
+                echo "<p class='text-danger'>Execute failed: " . $stmt->error . "</p>";
             }
+            $stmt->close();
         }
     }
 }
