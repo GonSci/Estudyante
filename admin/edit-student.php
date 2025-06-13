@@ -86,6 +86,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($stmt->execute()) {
+            // Update the users table as well
+            $user_update_sql = "UPDATE users SET username = ?, password = ? WHERE student_id = ?";
+            $user_update_stmt = $conn->prepare($user_update_sql);
+            if (!empty($password)) {
+                // If password was changed, use the new hashed password
+                $user_update_stmt->bind_param('ssi', $username, $hashedPassword, $student_id);
+            } else {
+                // If password was not changed, fetch the current password from users table
+                $get_user = $conn->prepare("SELECT password FROM users WHERE student_id = ?");
+                $get_user->bind_param('i', $student_id);
+                $get_user->execute();
+                $get_user->bind_result($current_user_password);
+                $get_user->fetch();
+                $get_user->close();
+                $user_update_stmt->bind_param('ssi', $username, $current_user_password, $student_id);
+            }
+            $user_update_stmt->execute();
+            $user_update_stmt->close();
+
             header("Location: manage-students.php?updated=1");
             exit;
         } else {
