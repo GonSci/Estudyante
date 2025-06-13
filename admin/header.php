@@ -7,6 +7,12 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin'){
 }
 
 ?>
+<style>
+    .nav-link:hover {
+        background-color: black;
+
+    }
+</style>
 
 <!DOCTYPE html>
 <html lang="en">

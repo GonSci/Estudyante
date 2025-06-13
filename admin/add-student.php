@@ -7,6 +7,7 @@
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Collect and sanitize inputs
     $first_name      = trim($_POST['first_name']);
+    $middle_name     = trim($_POST['middle_name']);
     $last_name       = trim($_POST['last_name']);
     $date_of_birth   = $_POST['date_of_birth'];
     $address         = trim($_POST['address']);
@@ -26,15 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "<p class='text-danger'>Please fill in all required fields.</p>";
     } else {
         $sql = "INSERT INTO students 
-                (first_name, last_name, date_of_birth, address, contact_number, email, program, enrollment_year, semester, username, password, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                (first_name, middle_name, last_name, date_of_birth, address, contact_number, email, program, enrollment_year, semester, username, password, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             echo "<p class='text-danger'>Prepare failed: " . $conn->error . "</p>";
         } else {
             $stmt->bind_param(
-                'sssssssssss',
-                $first_name, $last_name, $date_of_birth, $address, $contact_number,
+                'ssssssssssss',
+                $first_name,$middle_name, $last_name, $date_of_birth, $address, $contact_number,
                 $email, $program, $enrollment_year, $semester, $username, $password
             );
             if ($stmt->execute()) {
@@ -52,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- 🧾 Student Form -->
 <form method="POST" action="">
     <div class="mb-3"><label>First Name:</label><input type="text" name="first_name" class="form-control" required></div>
+    <div class="mb-3"><label>Middle Name:</label><input type="text" name="middle_name" class="form-control" required></div>
     <div class="mb-3"><label>Last Name:</label><input type="text" name="last_name" class="form-control" required></div>
     <div class="mb-3"><label>Date of Birth:</label><input type="date" name="date_of_birth" class="form-control"></div>
     <div class="mb-3"><label>Address:</label><textarea name="address" class="form-control"></textarea></div>
