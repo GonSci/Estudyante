@@ -39,8 +39,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $email, $program, $enrollment_year, $semester, $username, $password
             );
             if ($stmt->execute()) {
-                header("Location: manage-students.php?success=1");
-                exit;
+                // Get the new student's ID
+                $new_student_id = $conn->insert_id;
+
+                // Prepare user insert (use the same username and password, role = 'student')
+                $user_stmt = $conn->prepare("INSERT INTO users (username, password, role, student_id, created_at) VALUES (?, ?, 'student', ?, NOW())");
+                $user_stmt->bind_param('ssi', $username, $password, $new_student_id);
+
+                if ($user_stmt->execute()) {
+                    header("Location: manage-students.php?success=1");
+                    exit;
+                } else {
+                    echo "<p class='text-danger'>User creation failed: " . $user_stmt->error . "</p>";
+                }
+                $user_stmt->close();
             } else {
                 echo "<p class='text-danger'>Execute failed: " . $stmt->error . "</p>";
             }
