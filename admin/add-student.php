@@ -126,9 +126,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>">
     </div>
     <div class="mb-3">
-        <label>Program:</label>
-        <input type="text" name="program" class="form-control" required placeholder="e.g., BSCSSE"
-            value="<?= isset($_POST['program']) ? htmlspecialchars($_POST['program']) : '' ?>" require>
+        <label for="program">Program:</label>
+        <select name="program" id="program" class="form-control" required>
+            <option value="">-- Select Program --</option>
+            <option value="BSCpE">BSCpE – Bachelor of Science in Computer Engineering</option>
+            <option value="BSECE">BSECE – Bachelor of Science in Electronics Engineering</option>
+            <option value="BSEE">BSEE – Bachelor of Science in Electrical Engineering</option>
+            <option value="BSME">BSME – Bachelor of Science in Mechanical Engineering</option>
+            <option value="BSCE">BSCE – Bachelor of Science in Civil Engineering</option>
+            <option value="BSCS-SE">BSCS-SE – Bachelor of Science in Computer Science major in Software Engineering</option>
+            <option value="BSCS-DS">BSCS-DS – Bachelor of Science in Computer Science major in Data Science</option>
+            <option value="BSIT-BA">BSIT-BA – Bachelor of Science in Information Technology major in Business Analytics</option>
+            <option value="BSIT-IB">BSIT-IB – Bachelor of Science in Information Technology major in Innovation and Business</option>
+            <option value="BSIT-AGD">BSIT-AGD – Bachelor of Science in Information Technology major in Animation and Game Development</option>
+            <option value="BSIT-WMA">BSIT-WMA – Bachelor of Science in Information Technology major in Web and Mobile Applications</option>
+            <option value="BSIT-CY">BSIT-CY – Bachelor of Science in Information Technology major in Cybersecurity</option>
+            <option value="BMMA">BMMA – Bachelor of Multimedia Arts</option>
+        </select>
     </div>
     <div class="mb-3">
         <label>Enrollment Year:</label>
@@ -138,12 +152,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="mb-3">
         <label>Semester:</label>
         <select name="semester" class="form-control">
-            <option value="">Select</option>
-            <option value="1st" <?= (isset($_POST['semester']) && $_POST['semester'] == '1st') ? 'selected' : '' ?>>1st</option>
-            <option value="2nd" <?= (isset($_POST['semester']) && $_POST['semester'] == '2nd') ? 'selected' : '' ?>>2nd</option>
-            <option value="3rd" <?= (isset($_POST['semester']) && $_POST['semester'] == '3rd') ? 'selected' : '' ?>>3rd</option>
-            <option value="4th" <?= (isset($_POST['semester']) && $_POST['semester'] == '4th') ? 'selected' : '' ?>>4th</option>
-            <option value="5th" <?= (isset($_POST['semester']) && $_POST['semester'] == '5th') ? 'selected' : '' ?>>5th</option>
+            <option value="">-- Select Year --</option>
+            <option value="1st" <?= (isset($_POST['semester']) && $_POST['semester'] == '1st') ? 'selected' : '' ?>>1st Year</option>
+            <option value="2nd" <?= (isset($_POST['semester']) && $_POST['semester'] == '2nd') ? 'selected' : '' ?>>2nd Year</option>
+            <option value="3rd" <?= (isset($_POST['semester']) && $_POST['semester'] == '3rd') ? 'selected' : '' ?>>3rd Year</option>
+            <option value="4th" <?= (isset($_POST['semester']) && $_POST['semester'] == '4th') ? 'selected' : '' ?>>4th Year</option>
+            <option value="5th" <?= (isset($_POST['semester']) && $_POST['semester'] == '5th') ? 'selected' : '' ?>>5th Year</option>
             <option value="Summer" <?= (isset($_POST['semester']) && $_POST['semester'] == 'Summer') ? 'selected' : '' ?>>Summer</option>
         </select>
     </div>

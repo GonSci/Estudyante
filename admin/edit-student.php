@@ -2,6 +2,8 @@
 
 <?php
 include '../includes/db.php';
+include 'header.php';
+
 
 $student_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
@@ -45,7 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password        = $_POST['password']; // Optional new password
 
     if (empty($first_name) || empty($middle_name) || empty($last_name) || empty($email) || empty($program) || empty($username)) {
-        echo "<p class='text-danger'>Please fill in all required fields.</p>";
+        echo "<div class='alert alert-danger' role='alert'>
+                Please fill in all required fields.
+              </div>";
     } else {
         // Only check for duplicates if username or email has changed
         if ($username !== $current_username || $email !== $current_email) {
@@ -114,7 +118,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-include 'header.php';
 ?>
 
 <h3>Edit Student</h3>
@@ -125,11 +128,11 @@ include 'header.php';
 
 <form id="editStudentForm" method="POST" action="">
     <div class="mb-3"><label>First Name:</label>
-        <input type="text" name="first_name" value="<?= htmlspecialchars($student['first_name']) ?>" class="form-control" required>
+        <input type="text" name="first_name" value="<?= htmlspecialchars($student['first_name']) ?>" class="form-control" required> 
     </div>
 
     <div class="mb-3"><label>Middle Name:</label>
-        <input type="text" name="middle_name" value="<?= htmlspecialchars($student['middle_name']) ?>" class="form-control">
+        <input type="text" name="middle_name" value="<?= htmlspecialchars($student['middle_name']) ?>" class="form-control" required>
     </div>
 
     <div class="mb-3"><label>Last Name:</label>
@@ -137,32 +140,57 @@ include 'header.php';
     </div>
 
     <div class="mb-3"><label>Date of Birth:</label>
-        <input type="date" name="date_of_birth" value="<?= $student['date_of_birth'] ?>" class="form-control">
+        <input type="date" name="date_of_birth" value="<?= $student['date_of_birth'] ?>" class="form-control"required >
     </div>
 
     <div class="mb-3"><label>Address:</label>
-        <textarea name="address" class="form-control"><?= htmlspecialchars($student['address']) ?></textarea>
+        <textarea name="address" class="form-control" required ><?= htmlspecialchars($student['address']) ?></textarea>
     </div>
 
     <div class="mb-3"><label>Contact Number:</label>
-        <input type="text" name="contact_number" value="<?= $student['contact_number'] ?>" class="form-control">
+        <input type="tel" 
+               name="contact_number" 
+               value="<?= htmlspecialchars($student['contact_number']) ?>" 
+               class="form-control"
+               pattern="^09\d{9}$"
+               maxlength="11"
+               title="Contact number must start with 09 and be 11 digits long"
+               required>
     </div>
-
     <div class="mb-3"><label>Email:</label>
-        <input type="email" name="email" value="<?= $student['email'] ?>" class="form-control" required>
+        <input type="email" name="email" value="<?= htmlspecialchars($student['email']) ?>" class="form-control" required>
     </div>
 
     <div class="mb-3"><label>Program:</label>
-        <input type="text" name="program" value="<?= htmlspecialchars($student['program']) ?>" class="form-control" required>
+        <select name="program" class="form-control" required>
+            <option value="">-- Select Program --</option>
+            <option value="BSCpE" <?= $student['program'] == 'BSCpE' ? 'selected' : '' ?>>BSCpE – Bachelor of Science in Computer Engineering</option>
+            <option value="BSECE" <?= $student['program'] == 'BSECE' ? 'selected' : '' ?>>BSECE – Bachelor of Science in Electronics Engineering</option>
+            <option value="BSEE" <?= $student['program'] == 'BSEE' ? 'selected' : '' ?>>BSEE – Bachelor of Science in Electrical Engineering</option>
+            <option value="BSME" <?= $student['program'] == 'BSME' ? 'selected' : '' ?>>BSME – Bachelor of Science in Mechanical Engineering</option>
+            <option value="BSCE" <?= $student['program'] == 'BSCE' ? 'selected' : '' ?>>BSCE – Bachelor of Science in Civil Engineering</option>
+            <option value="BSCS-SE" <?= $student['program'] == 'BSCS-SE' ? 'selected' : '' ?>>BSCS-SE – Bachelor of Science in Computer Science major in Software Engineering</option>
+            <option value="BSCS-DS" <?= $student['program'] == 'BSCS-DS' ? 'selected' : '' ?>>BSCS-DS – Bachelor of Science in Computer Science major in Data Science</option>
+            <option value="BSIT-BA" <?= $student['program'] == 'BSIT-BA' ? 'selected' : '' ?>>BSIT-BA – Bachelor of Science in Information Technology major in Business Analytics</option>
+            <option value="BSIT-IB" <?= $student['program'] == 'BSIT-IB' ? 'selected' : '' ?>>BSIT-IB – Bachelor of Science in Information Technology major in Innovation and Business</option>
+            <option value="BSIT-AGD" <?= $student['program'] == 'BSIT-AGD' ? 'selected' : '' ?>>BSIT-AGD – Bachelor of Science in Information Technology major in Animation and Game Development</option>
+            <option value="BSIT-WMA" <?= $student['program'] == 'BSIT-WMA' ? 'selected' : '' ?>>BSIT-WMA – Bachelor of Science in Information Technology major in Web and Mobile Applications</option>
+            <option value="BSIT-CY" <?= $student['program'] == 'BSIT-CY' ? 'selected' : '' ?>>BSIT-CY – Bachelor of Science in Information Technology major in Cybersecurity</option>
+            <option value="BMMA" <?= $student['program'] == 'BMMA' ? 'selected' : '' ?>>BMMA – Bachelor of Multimedia Arts</option>
+        </select>
     </div>
-    
-    <div class="mb-3">
-        <label>Enrollment Year:</label>
-        <input type="number" name="enrollment_year" value="<?= $student['enrollment_year'] ?>" min="2000" max="<?= date('Y') ?>" class="form-control">
+
+    <div class="mb-3"><label>Enrollment Year:</label>
+        <input type="number" 
+               name="enrollment_year" 
+               class="form-control" 
+               value="<?= htmlspecialchars($student['enrollment_year']) ?>" 
+               min="1900" max="<?= date('Y') ?>" 
+               required>
     </div>
     <div class="mb-3">
         <label>Semester:</label>
-        <select name="semester" class="form-control">
+        <select name="semester" class="form-control" required>
             <?php
             $semesters = ["1st", "2nd", "3rd", "4th", "5th", "Summer"];
             foreach ($semesters as $sem) {
@@ -174,7 +202,7 @@ include 'header.php';
     </div>
     <hr>
     <div class="mb-3"><label>Username:</label>
-        <input type="text" name="username" value="<?= htmlspecialchars($student['username']) ?>" class="form-control" required>
+        <input type="text" name="username" value="<?= htmlspecialchars($student['username']) ?>" class="form-control">
     </div>
     <div class="mb-3">
         <label>New Password (leave blank to keep current password):</label>
