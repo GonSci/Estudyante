@@ -32,6 +32,7 @@ $current_email = $student['email'];
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $first_name      = trim($_POST['first_name']);
+    $middle_name     = trim($_POST['middle_name']);
     $last_name       = trim($_POST['last_name']);
     $date_of_birth   = $_POST['date_of_birth'];
     $address         = trim($_POST['address']);
@@ -43,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username        = trim($_POST['username']);
     $password        = $_POST['password']; // Optional new password
 
-    if (empty($first_name) || empty($last_name) || empty($email) || empty($program) || empty($username)) {
+    if (empty($first_name) || empty($middle_name) || empty($last_name) || empty($email) || empty($program) || empty($username)) {
         echo "<p class='text-danger'>Please fill in all required fields.</p>";
     } else {
         // Only check for duplicates if username or email has changed
@@ -67,20 +68,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($password)) {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("UPDATE students SET 
-                first_name = ?, last_name = ?, date_of_birth = ?, address = ?, contact_number = ?, 
+                first_name = ?, middle_name = ?, last_name = ?, date_of_birth = ?, address = ?, contact_number = ?, 
                 email = ?, program = ?, enrollment_year = ?, semester = ?, username = ?, password = ?
                 WHERE id = ?");
-            $stmt->bind_param("sssssssssssi",
-                $first_name, $last_name, $date_of_birth, $address, $contact_number,
+            $stmt->bind_param("ssssssssssssi",
+                $first_name, $middle_name, $last_name, $date_of_birth, $address, $contact_number,
                 $email, $program, $enrollment_year, $semester, $username, $hashedPassword, $student_id
             );
         } else {
             $stmt = $conn->prepare("UPDATE students SET 
-                first_name = ?, last_name = ?, date_of_birth = ?, address = ?, contact_number = ?, 
+                first_name = ?, middle_name = ?, last_name = ?, date_of_birth = ?, address = ?, contact_number = ?, 
                 email = ?, program = ?, enrollment_year = ?, semester = ?, username = ?
                 WHERE id = ?");
-            $stmt->bind_param("ssssssssssi",
-                $first_name, $last_name, $date_of_birth, $address, $contact_number,
+            $stmt->bind_param("sssssssssssi",
+                $first_name, $middle_name, $last_name, $date_of_birth, $address, $contact_number,
                 $email, $program, $enrollment_year, $semester, $username, $student_id
             );
         }
@@ -126,24 +127,35 @@ include 'header.php';
     <div class="mb-3"><label>First Name:</label>
         <input type="text" name="first_name" value="<?= htmlspecialchars($student['first_name']) ?>" class="form-control" required>
     </div>
+
+    <div class="mb-3"><label>Middle Name:</label>
+        <input type="text" name="middle_name" value="<?= htmlspecialchars($student['middle_name']) ?>" class="form-control">
+    </div>
+
     <div class="mb-3"><label>Last Name:</label>
         <input type="text" name="last_name" value="<?= htmlspecialchars($student['last_name']) ?>" class="form-control" required>
     </div>
+
     <div class="mb-3"><label>Date of Birth:</label>
         <input type="date" name="date_of_birth" value="<?= $student['date_of_birth'] ?>" class="form-control">
     </div>
+
     <div class="mb-3"><label>Address:</label>
         <textarea name="address" class="form-control"><?= htmlspecialchars($student['address']) ?></textarea>
     </div>
+
     <div class="mb-3"><label>Contact Number:</label>
         <input type="text" name="contact_number" value="<?= $student['contact_number'] ?>" class="form-control">
     </div>
+
     <div class="mb-3"><label>Email:</label>
         <input type="email" name="email" value="<?= $student['email'] ?>" class="form-control" required>
     </div>
+
     <div class="mb-3"><label>Program:</label>
         <input type="text" name="program" value="<?= htmlspecialchars($student['program']) ?>" class="form-control" required>
     </div>
+    
     <div class="mb-3">
         <label>Enrollment Year:</label>
         <input type="number" name="enrollment_year" value="<?= $student['enrollment_year'] ?>" min="2000" max="<?= date('Y') ?>" class="form-control">
