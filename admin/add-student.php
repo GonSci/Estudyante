@@ -20,10 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password        = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
     // Validation check
-    if (
-        empty($first_name) || empty($last_name) || empty($email) || empty($program) ||
-        empty($username) || empty($_POST['password'])
-    ) {
+    if (empty($first_name) || empty($last_name) || empty($email) || empty($program) || empty($username) || empty($_POST['password'])) {
         echo "<p class='text-danger'>Please fill in all required fields.</p>";
     } else {
         $sql = "INSERT INTO students 
@@ -64,17 +61,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!-- 🧾 Student Form -->
 <form method="POST" action="">
-    <div class="mb-3"><label>First Name:</label><input type="text" name="first_name" class="form-control" required></div>
-    <div class="mb-3"><label>Middle Name:</label><input type="text" name="middle_name" class="form-control" required></div>
-    <div class="mb-3"><label>Last Name:</label><input type="text" name="last_name" class="form-control" required></div>
+    <div class="mb-3"><label>First Name:</label><input type="text" name="first_name" class="form-control" required placeholder="e.g., Juan Han"></div>
+    <div class="mb-3"><label>Middle Name:</label><input type="text" name="middle_name" class="form-control" required placeholder="e.g., Andrade"></div>
+    <div class="mb-3"><label>Last Name:</label><input type="text" name="last_name" class="form-control" required placeholder="e.g., Dela Cruz"></div>
     <div class="mb-3"><label>Date of Birth:</label><input type="date" name="date_of_birth" class="form-control"></div>
-    <div class="mb-3"><label>Address:</label><textarea name="address" class="form-control"></textarea></div>
-    <div class="mb-3"><label>Contact Number:</label><input type="text" name="contact_number" class="form-control"></div>
-    <div class="mb-3"><label>Email:</label><input type="email" name="email" class="form-control" required></div>
-    <div class="mb-3"><label>Program:</label><input type="text" name="program" class="form-control" required></div>
+    <div class="mb-3"><label>Address:</label><textarea name="address" class="form-control" placeholder="e.g., 123 Summit Avenue"></textarea></div>
+    <div class="mb-3"><label>Contact Number:</label><input type="text" name="contact_number" class="form-control" placeholder="e.g., 09123456789"></div>
+    <div class="mb-3"><label>Email:</label><input type="email" name="email" class="form-control" required placeholder="e.g., JuanDelaCruz@gmail.com"></div>
+    <div class="mb-3"><label>Program:</label><input type="text" name="program" class="form-control" required placeholder="e.g., BSCSSE"></div>
     <div class="mb-3">
         <label>Enrollment Year:</label>
-        <input type="number" name="enrollment_year" min="2000" max="<?= date('Y') ?>" class="form-control">
+        <input type="number" name="enrollment_year" min="2000" max="<?= date('Y') ?>" class="form-control" placeholder="e.g., 2023">
     </div>
     <div class="mb-3">
         <label>Semester:</label>
