@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contact_number  = trim($_POST['contact_number']);
     $email           = trim($_POST['email']);
     $program         = trim($_POST['program']);
-    $enrollment_year = $_POST['enrollment_year'];
+    $enrollment_year = isset($_POST['enrollment_year']);
     $semester        = $_POST['semester'];
     $username        = trim($_POST['username']);
     $password        = password_hash($_POST['password'], PASSWORD_DEFAULT);
@@ -108,17 +108,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <div class="mb-3">
         <label>Date of Birth:</label>
-        <input type="date" name="date_of_birth" class="form-control"
-            value="<?= isset($_POST['date_of_birth']) ? htmlspecialchars($_POST['date_of_birth']) : '' ?>">
+        <input type="date" name="date_of_birth" class="form-control" required title="Date of Birth must be in YYYY-MM-DD format"
+            value="<?= isset($_POST['date_of_birth']) ? htmlspecialchars($_POST['date_of_birth']) : '' ?> ">
     </div>
     <div class="mb-3">
         <label>Address:</label>
-        <textarea name="address" class="form-control" placeholder="e.g., 123 Summit Avenue"><?= isset($_POST['address']) ? htmlspecialchars($_POST['address']) : '' ?></textarea>
+        <textarea name="address" class="form-control" placeholder="e.g., 123 Summit Avenue" required><?= isset($_POST['address']) ? htmlspecialchars($_POST['address']) : '' ?></textarea>
     </div>
     <div class="mb-3">
         <label>Contact Number:</label>
-        <input type="text" name="contact_number" class="form-control" placeholder="e.g., 09123456789"
-            value="<?= isset($_POST['contact_number']) ? htmlspecialchars($_POST['contact_number']) : '' ?>">
+        <input type="tel" name="contact_number" class="form-control" placeholder="e.g., 09123456789" pattern="^09\d{9}$" maxlength="11"title="Contact number must start with 09 and be 11 digits long"
+               value="<?= isset($_POST['contact_number']) ? htmlspecialchars($_POST['contact_number']) : '' ?>">
     </div>
     <div class="mb-3">
         <label>Email:</label>
@@ -128,11 +128,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="mb-3">
         <label>Program:</label>
         <input type="text" name="program" class="form-control" required placeholder="e.g., BSCSSE"
-            value="<?= isset($_POST['program']) ? htmlspecialchars($_POST['program']) : '' ?>">
+            value="<?= isset($_POST['program']) ? htmlspecialchars($_POST['program']) : '' ?>" require>
     </div>
     <div class="mb-3">
         <label>Enrollment Year:</label>
-        <input type="number" name="enrollment_year" min="2000" max="<?= date('Y') ?>" class="form-control" placeholder="e.g., 2023"
+        <input type="number" name="enrollment_year" min="2023" max="<?= date('Y') ?>" class="form-control" placeholder="e.g., 2023" required
             value="<?= isset($_POST['enrollment_year']) ? htmlspecialchars($_POST['enrollment_year']) : '' ?>">
     </div>
     <div class="mb-3">
