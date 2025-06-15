@@ -231,7 +231,7 @@
 
     <!-- Login Card -->
     <div class="card">
-      <h2>Sign In</h2>
+      <h2>Log In</h2>
       <p>Enter your credentials to access your account</p>
 
       <form action="login-process.php" method="POST">
@@ -257,7 +257,7 @@
           <a href="#">Forgot password?</a>
         </div>
 
-        <button type="submit" class="login-btn">Sign In</button>
+        <button type="submit" class="login-btn">Log In</button>
 
         <?php if (isset($_GET['error']) && $_GET['error'] === 'invalid'): ?>
           <div class="error-msg">Invalid username or password.</div>
