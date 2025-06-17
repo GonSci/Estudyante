@@ -12,10 +12,26 @@ if (!$result) {
     include 'footer.php';
     exit;
 }
+
+function getPrerequisiteTitles($conn, $course_id) {
+    $stmt = $conn->prepare("SELECT c.title FROM course_prerequisites cp JOIN courses c ON cp.prerequisite_id = c.id WHERE cp.course_id = ?");
+    $stmt->bind_param("i", $course_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $titles = [];
+    while ($row = $result->fetch_assoc()) {
+        $titles[] = $row['title'];
+    }
+    $stmt->close();
+    return $titles;
+}
 ?>
 
 <!-- Add Course Button -->
 <a href="add-course.php" class="btn btn-sm btn-success mb-2">Add Course</a>
+<a href="assign-courses-to-program.php" class="btn btn-sm btn-success mb-2">Assign Courses to Program</a>
+
+
 
 <!-- Courses Table -->
 <table class="table table-bordered">
@@ -35,7 +51,12 @@ if (!$result) {
             <td><?= htmlspecialchars($row['title']) ?></td>
             <td><?= htmlspecialchars($row['description']) ?></td>
             <td><?= htmlspecialchars($row['credits']) ?></td>
-            <td><?= htmlspecialchars($row['prerequisites']) ?></td>
+            <td>
+                <?php
+                    $prereqs = getPrerequisiteTitles($conn, $row['id']);
+                    echo $prereqs ? htmlspecialchars(implode(', ', $prereqs)) : '<span class="text-muted">None</span>';
+                ?>
+            </td>
             <td><?= htmlspecialchars($row['max_capacity']) ?></td>
             <td>
                 <a href="edit-course.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
