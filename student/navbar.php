@@ -18,22 +18,33 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
             background: #f8f9fa;
         }
         .sidebar {
-            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 220px; /* set sidebar width */
+            height: 100vh;
             background: #343a40;
             color: #fff;
             padding-top: 30px;
+            z-index: 1000;
         }
+
         .sidebar a {
             color: #fff;
             display: block;
             padding: 12px 20px;
             text-decoration: none;
         }
+
         .sidebar a.active, .sidebar a:hover {
             background: #495057;
         }
+
         .main-content {
+            margin-left: 220px; /* same as sidebar width */
             padding: 30px;
+            background: #f8f9fa;
+            min-height: 100vh;
         }
     </style>
 </head>
@@ -49,5 +60,3 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
             <a href="register-course.php" class="<?= basename($_SERVER['PHP_SELF']) == 'register-course.php' ? 'active' : '' ?>">Register Course</a>
             <a href="../logout.php">Logout</a>
         </nav>
-        <!-- Main Content -->
-        <main class="col-md-10 main-content"></main>
