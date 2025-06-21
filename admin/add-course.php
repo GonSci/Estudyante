@@ -4,6 +4,7 @@ include '../includes/db.php';
 
 // Fetch all existing courses for prerequisites dropdown
 $all_courses = $conn->query("SELECT id, title FROM courses");
+$programs = $conn->query("SELECT DISTINCT program_code FROM program_course UNION SELECT DISTINCT program AS program_code FROM students");
 ?>
 
 <h3>Add New Course</h3>
@@ -31,6 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $insert_prereq = $conn->prepare("INSERT INTO course_prerequisites (course_id, prerequisite_id) VALUES (?, ?)");
                     $insert_prereq->bind_param("ii", $course_id, $prereq_id);
                     $insert_prereq->execute();
+                }
+            }
+
+            // Assign course to selected programs
+            $assigned_programs = isset($_POST['programs']) ? $_POST['programs'] : [];
+            foreach ($assigned_programs as $program_code) {
+                $program_code = trim($program_code);
+                if ($program_code !== '') {
+                    $assign_stmt = $conn->prepare("INSERT INTO program_course (program_code, course_id) VALUES (?, ?)");
+                    $assign_stmt->bind_param("si", $program_code, $course_id);
+                    $assign_stmt->execute();
+                    $assign_stmt->close();
                 }
             }
 
@@ -72,6 +85,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="mb-3">
         <label>Max Capacity:</label>
         <input type="number" name="max_capacity" class="form-control" min="1" required value="<?= isset($_POST['max_capacity']) ? htmlspecialchars($_POST['max_capacity']) : '' ?>">
+    </div>
+    <div class="mb-3">
+        <label>Assign to Program(s):</label>
+        <select name="programs[]" class="form-control" multiple>
+            <?php while ($row = $programs->fetch_assoc()): ?>
+                <option value="<?= htmlspecialchars($row['program_code']) ?>"
+                    <?= (isset($_POST['programs']) && in_array($row['program_code'], $_POST['programs'])) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($row['program_code']) ?>
+                </option>
+            <?php endwhile; ?>
+        </select>
+        <small class="form-text text-muted">Hold Ctrl (Windows) or Command (Mac) to select multiple programs.</small>
     </div>
     <button type="submit" class="btn btn-primary">Add Course</button>
     <a href="manage-courses.php" class="btn btn-secondary">Back</a>

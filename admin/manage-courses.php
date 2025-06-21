@@ -25,6 +25,19 @@ function getPrerequisiteTitles($conn, $course_id) {
     $stmt->close();
     return $titles;
 }
+
+function getAssignedPrograms($conn, $course_id) {
+    $stmt = $conn->prepare("SELECT program_code FROM program_course WHERE course_id = ?");
+    $stmt->bind_param("i", $course_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $programs = [];
+    while ($row = $result->fetch_assoc()) {
+        $programs[] = $row['program_code'];
+    }
+    $stmt->close();
+    return $programs;
+}
 ?>
 
 <!-- Add Course Button -->
@@ -42,6 +55,7 @@ function getPrerequisiteTitles($conn, $course_id) {
             <th>Units</th>
             <th>Prerequisites</th>
             <th>Max Capacity</th>
+            <th>Programs</th> <!-- Add this column -->
             <th>Actions</th>
         </tr>
     </thead>
@@ -58,6 +72,12 @@ function getPrerequisiteTitles($conn, $course_id) {
                 ?>
             </td>
             <td><?= htmlspecialchars($row['max_capacity']) ?></td>
+            <td>
+                <?php
+                    $programs = getAssignedPrograms($conn, $row['id']);
+                    echo $programs ? htmlspecialchars(implode(', ', $programs)) : '<span class="text-muted">None</span>';
+                ?>
+            </td>
             <td>
                 <a href="edit-course.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
                 <a 
