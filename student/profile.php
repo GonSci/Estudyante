@@ -1,12 +1,9 @@
 <?php include 'navbar.php'; ?>
-<main class="col-md-10 main-content">
+
 <?php
 include '../includes/db.php';
 
 $username = $_SESSION['username'];
-
-
-
 
 $stmt = $conn->prepare("SELECT * FROM students WHERE username = ?");
 $stmt->bind_param("s", $username);
@@ -15,10 +12,10 @@ $result = $stmt->get_result();
 $student = $result->fetch_assoc();
 $stmt->close();
 
-
 $_SESSION['username'] = $username;
 $_SESSION['role'] = 'student';
 ?>
+
 <p>Welcome, <?= $student['first_name'] ." " . $student['middle_name'] ." ". $student['last_name']?></p>
 
 <h2>My Profile</h2>
@@ -35,6 +32,7 @@ $_SESSION['role'] = 'student';
     <tr><th>Semester</th><td><?= htmlspecialchars($student['semester']) ?></td></tr>
     <tr><th>Username</th><td><?= htmlspecialchars($student['username']) ?></td></tr>
 </table>
+
         </main>
     </div>
 </div>

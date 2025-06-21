@@ -18,15 +18,10 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
             background: #f8f9fa;
         }
         .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 220px; /* set sidebar width */
-            height: 100vh;
             background: #343a40;
             color: #fff;
+            min-height: 100vh;
             padding-top: 30px;
-            z-index: 1000;
         }
 
         .sidebar a {
@@ -41,7 +36,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
         }
 
         .main-content {
-            margin-left: 220px; /* same as sidebar width */
             padding: 30px;
             background: #f8f9fa;
             min-height: 100vh;
@@ -52,11 +46,13 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
-        <nav class="col-md-2 sidebar">
+        <nav class="col-md-3 col-lg-2 sidebar">
             <h4 class="px-3">Student Menu</h4>
             <a href="dashboard.php" class="<?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : '' ?>">Dashboard</a>
             <a href="profile.php" class="<?= basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'active' : '' ?>">Profile</a>
-            <a href="courses.php" class="<?= basename($_SERVER['PHP_SELF']) == 'courses.php' ? 'active' : '' ?>">My Courses</a>
+            <a href="view-courses.php" class="<?= basename($_SERVER['PHP_SELF']) == 'view-courses.php' ? 'active' : '' ?>">My Courses</a>
             <a href="register-course.php" class="<?= basename($_SERVER['PHP_SELF']) == 'register-course.php' ? 'active' : '' ?>">Register Course</a>
             <a href="../logout.php">Logout</a>
         </nav>
+        <!-- Main content starts here - don't close this div -->
+        <main class="col-md-9 col-lg-10 main-content">
