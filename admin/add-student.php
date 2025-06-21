@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contact_number  = trim($_POST['contact_number']);
     $email           = trim($_POST['email']);
     $program         = trim($_POST['program']);
-    $enrollment_year = isset($_POST['enrollment_year']);
+    $enrollment_year = trim($_POST['enrollment_year']);
     $semester        = $_POST['semester'];
     $username        = trim($_POST['username']);
     $password        = password_hash($_POST['password'], PASSWORD_DEFAULT);
