@@ -1,9 +1,5 @@
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <?php
 include '../includes/db.php';
-include 'header.php';
-
 
 $student_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
@@ -118,102 +114,323 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+include 'header.php';
 ?>
 
-<h3>Edit Student</h3>
+<style>
+/* Paste the style block from add-student.php here */
+.form-container {
+    max-width: 900px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
+    overflow: hidden;
+}
+.form-header {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+.form-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+}
+.form-header p {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+.form-body {
+    padding: 2rem;
+}
+.section-title {
+    color: #1e40af;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5f3ff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.section-title:first-child {
+    margin-top: 0;
+}
+.section-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+.form-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.form-grid.two-cols {
+    grid-template-columns: 1fr 1fr;
+}
+.form-grid.three-cols {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+.form-group {
+    position: relative;
+}
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+.form-label {
+    display: block;
+    color: #374151;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+.form-label.required::after {
+    content: '*';
+    margin-left: 4px;
+}
+.form-input, .form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+.form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: #fefefe;
+}
+.form-input::placeholder {
+    color: #9ca3af;
+    font-style: italic;
+}
+.form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+.form-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+.error-message {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.success-message {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+.submit-button {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    margin-top: 1rem;
+}
+.submit-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+.submit-button:active {
+    transform: translateY(0);
+}
+.input-hint {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+@media (max-width: 768px) {
+    .form-container {
+        margin: 1rem;
+        border-radius: 8px;
+    }
+    .form-header {
+        padding: 1.5rem;
+    }
+    .form-body {
+        padding: 1.5rem;
+    }
+    .form-grid.two-cols,
+    .form-grid.three-cols {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 
-<?php if (!empty($successMessage)): ?>
-    <div class="alert alert-success"><?= $successMessage ?></div>
-<?php endif; ?>
+<div class="form-container">
+    <div class="form-header">
+        <h2>Edit Student</h2>
+        <p>Update the information below and save changes</p>
+    </div>
+    <div class="form-body">
+        <?php if (!empty($successMessage)): ?>
+            <div class="success-message"><?= $successMessage ?></div>
+        <?php endif; ?>
 
-<form id="editStudentForm" method="POST" action="">
-    <div class="mb-3"><label>First Name:</label>
-        <input type="text" name="first_name" value="<?= htmlspecialchars($student['first_name']) ?>" class="form-control" required> 
+        <form id="editStudentForm" method="POST" action="">
+            <!-- Personal Information Section -->
+            <div class="section-title">
+                <div class="section-icon">👤</div>
+                Personal Information
+            </div>
+            <div class="form-grid three-cols">
+                <div class="form-group">
+                    <label class="form-label required">First Name</label>
+                    <input type="text" name="first_name" class="form-input" required value="<?= htmlspecialchars($student['first_name']) ?>">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Middle Name</label>
+                    <input type="text" name="middle_name" class="form-input" value="<?= htmlspecialchars($student['middle_name']) ?>">
+                </div>
+                <div class="form-group">
+                    <label class="form-label required">Last Name</label>
+                    <input type="text" name="last_name" class="form-input" required value="<?= htmlspecialchars($student['last_name']) ?>">
+                </div>
+            </div>
+            <div class="form-grid two-cols">
+                <div class="form-group">
+                    <label class="form-label required">Date of Birth</label>
+                    <input type="date" name="date_of_birth" class="form-input" required value="<?= $student['date_of_birth'] ?>">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact Number</label>
+                    <input type="tel" name="contact_number" class="form-input"
+                        pattern="^09\d{9}$"
+                        maxlength="11"
+                        title="Contact number must start with 09 and be 11 digits long"
+                        value="<?= htmlspecialchars($student['contact_number']) ?>">
+                    <div class="input-hint">Format: 09XXXXXXXXX (11 digits)</div>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label class="form-label">Address</label>
+                    <textarea name="address" class="form-textarea"><?= htmlspecialchars($student['address']) ?></textarea>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label class="form-label required">Email Address</label>
+                    <input type="email" name="email" class="form-input" required value="<?= htmlspecialchars($student['email']) ?>">
+                </div>
+            </div>
+            <!-- Academic Information Section -->
+            <div class="section-title">
+                <div class="section-icon">🎓</div>
+                Academic Information
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label class="form-label required">Program</label>
+                    <select name="program" class="form-select" required>
+                        <option value="">-- Select Program --</option>
+                        <option value="BSCpE" <?= $student['program'] == 'BSCpE' ? 'selected' : '' ?>>BSCpE – Bachelor of Science in Computer Engineering</option>
+                        <option value="BSECE" <?= $student['program'] == 'BSECE' ? 'selected' : '' ?>>BSECE – Bachelor of Science in Electronics Engineering</option>
+                        <option value="BSEE" <?= $student['program'] == 'BSEE' ? 'selected' : '' ?>>BSEE – Bachelor of Science in Electrical Engineering</option>
+                        <option value="BSME" <?= $student['program'] == 'BSME' ? 'selected' : '' ?>>BSME – Bachelor of Science in Mechanical Engineering</option>
+                        <option value="BSCE" <?= $student['program'] == 'BSCE' ? 'selected' : '' ?>>BSCE – Bachelor of Science in Civil Engineering</option>
+                        <option value="BSCS-SE" <?= $student['program'] == 'BSCS-SE' ? 'selected' : '' ?>>BSCS-SE – Bachelor of Science in Computer Science major in Software Engineering</option>
+                        <option value="BSCS-DS" <?= $student['program'] == 'BSCS-DS' ? 'selected' : '' ?>>BSCS-DS – Bachelor of Science in Computer Science major in Data Science</option>
+                        <option value="BSIT-BA" <?= $student['program'] == 'BSIT-BA' ? 'selected' : '' ?>>BSIT-BA – Bachelor of Science in Information Technology major in Business Analytics</option>
+                        <option value="BSIT-IB" <?= $student['program'] == 'BSIT-IB' ? 'selected' : '' ?>>BSIT-IB – Bachelor of Science in Information Technology major in Innovation and Business</option>
+                        <option value="BSIT-AGD" <?= $student['program'] == 'BSIT-AGD' ? 'selected' : '' ?>>BSIT-AGD – Bachelor of Science in Information Technology major in Animation and Game Development</option>
+                        <option value="BSIT-WMA" <?= $student['program'] == 'BSIT-WMA' ? 'selected' : '' ?>>BSIT-WMA – Bachelor of Science in Information Technology major in Web and Mobile Applications</option>
+                        <option value="BSIT-CY" <?= $student['program'] == 'BSIT-CY' ? 'selected' : '' ?>>BSIT-CY – Bachelor of Science in Information Technology major in Cybersecurity</option>
+                        <option value="BMMA" <?= $student['program'] == 'BMMA' ? 'selected' : '' ?>>BMMA – Bachelor of Multimedia Arts</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-grid two-cols">
+                <div class="form-group">
+                    <label class="form-label">Year Level</label>
+                    <select name="year_level" class="form-select">
+                        <option value="">-- Select Year --</option>
+                        <option value="1st" <?= $student['year_level'] == '1st' ? 'selected' : '' ?>>1st Year</option>
+                        <option value="2nd" <?= $student['year_level'] == '2nd' ? 'selected' : '' ?>>2nd Year</option>
+                        <option value="3rd" <?= $student['year_level'] == '3rd' ? 'selected' : '' ?>>3rd Year</option>
+                        <option value="4th" <?= $student['year_level'] == '4th' ? 'selected' : '' ?>>4th Year</option>
+                        <option value="5th" <?= $student['year_level'] == '5th' ? 'selected' : '' ?>>5th Year</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label required">Academic Term</label>
+                    <select name="academic_term" class="form-select" required>
+                        <option value="">-- Select Term --</option>
+                        <option value="1st Term" <?= $student['academic_term'] == '1st Term' ? 'selected' : '' ?>>1st Term</option>
+                        <option value="2nd Term" <?= $student['academic_term'] == '2nd Term' ? 'selected' : '' ?>>2nd Term</option>
+                        <option value="3rd Term" <?= $student['academic_term'] == '3rd Term' ? 'selected' : '' ?>>3rd Term</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Account Information Section -->
+            <div class="section-title">
+                <div class="section-icon">🔐</div>
+                Account Information
+            </div>
+            <div class="form-grid two-cols">
+                <div class="form-group">
+                    <label class="form-label required">Username</label>
+                    <input type="text" name="username" class="form-input" required value="<?= htmlspecialchars($student['username']) ?>">
+                    <div class="input-hint">Username must be unique across the system</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">New Password (leave blank to keep current password):</label>
+                    <input type="password" name="password" class="form-input">
+                    <div class="input-hint">Use a strong password with letters, numbers, and symbols</div>
+                </div>
+            </div>
+            <button type="submit" class="submit-button">Update Student</button>
+            <a href="manage-students.php" class="btn btn-secondary" style="width:100%;margin-top:10px;">Back</a>
+        </form>
     </div>
+</div>
 
-    <div class="mb-3"><label>Middle Name:</label>
-        <input type="text" name="middle_name" value="<?= htmlspecialchars($student['middle_name']) ?>" class="form-control" required>
-    </div>
-
-    <div class="mb-3"><label>Last Name:</label>
-        <input type="text" name="last_name" value="<?= htmlspecialchars($student['last_name']) ?>" class="form-control" required>
-    </div>
-
-    <div class="mb-3"><label>Date of Birth:</label>
-        <input type="date" name="date_of_birth" value="<?= $student['date_of_birth'] ?>" class="form-control"required >
-    </div>
-
-    <div class="mb-3"><label>Address:</label>
-        <textarea name="address" class="form-control" required ><?= htmlspecialchars($student['address']) ?></textarea>
-    </div>
-
-    <div class="mb-3"><label>Contact Number:</label>
-        <input type="tel" 
-               name="contact_number" 
-               value="<?= htmlspecialchars($student['contact_number']) ?>" 
-               class="form-control"
-               pattern="^09\d{9}$"
-               maxlength="11"
-               title="Contact number must start with 09 and be 11 digits long"
-               required>
-    </div>
-    <div class="mb-3"><label>Email:</label>
-        <input type="email" name="email" value="<?= htmlspecialchars($student['email']) ?>" class="form-control" required>
-    </div>
-
-    <div class="mb-3"><label>Program:</label>
-        <select name="program" class="form-control" required>
-            <option value="">-- Select Program --</option>
-            <option value="BSCpE" <?= $student['program'] == 'BSCpE' ? 'selected' : '' ?>>BSCpE – Bachelor of Science in Computer Engineering</option>
-            <option value="BSECE" <?= $student['program'] == 'BSECE' ? 'selected' : '' ?>>BSECE – Bachelor of Science in Electronics Engineering</option>
-            <option value="BSEE" <?= $student['program'] == 'BSEE' ? 'selected' : '' ?>>BSEE – Bachelor of Science in Electrical Engineering</option>
-            <option value="BSME" <?= $student['program'] == 'BSME' ? 'selected' : '' ?>>BSME – Bachelor of Science in Mechanical Engineering</option>
-            <option value="BSCE" <?= $student['program'] == 'BSCE' ? 'selected' : '' ?>>BSCE – Bachelor of Science in Civil Engineering</option>
-            <option value="BSCS-SE" <?= $student['program'] == 'BSCS-SE' ? 'selected' : '' ?>>BSCS-SE – Bachelor of Science in Computer Science major in Software Engineering</option>
-            <option value="BSCS-DS" <?= $student['program'] == 'BSCS-DS' ? 'selected' : '' ?>>BSCS-DS – Bachelor of Science in Computer Science major in Data Science</option>
-            <option value="BSIT-BA" <?= $student['program'] == 'BSIT-BA' ? 'selected' : '' ?>>BSIT-BA – Bachelor of Science in Information Technology major in Business Analytics</option>
-            <option value="BSIT-IB" <?= $student['program'] == 'BSIT-IB' ? 'selected' : '' ?>>BSIT-IB – Bachelor of Science in Information Technology major in Innovation and Business</option>
-            <option value="BSIT-AGD" <?= $student['program'] == 'BSIT-AGD' ? 'selected' : '' ?>>BSIT-AGD – Bachelor of Science in Information Technology major in Animation and Game Development</option>
-            <option value="BSIT-WMA" <?= $student['program'] == 'BSIT-WMA' ? 'selected' : '' ?>>BSIT-WMA – Bachelor of Science in Information Technology major in Web and Mobile Applications</option>
-            <option value="BSIT-CY" <?= $student['program'] == 'BSIT-CY' ? 'selected' : '' ?>>BSIT-CY – Bachelor of Science in Information Technology major in Cybersecurity</option>
-            <option value="BMMA" <?= $student['program'] == 'BMMA' ? 'selected' : '' ?>>BMMA – Bachelor of Multimedia Arts</option>
-        </select>
-    </div>
-
-    <div class="mb-3">
-    <label>Year Level:</label>
-        <select name="year_level" class="form-control">
-            <option value="">-- Select Year --</option>
-            <option value="1st" <?= $student['year_level'] == '1st' ? 'selected' : '' ?>>1st Year</option>
-            <option value="2nd" <?= $student['year_level'] == '2nd' ? 'selected' : '' ?>>2nd Year</option>
-            <option value="3rd" <?= $student['year_level'] == '3rd' ? 'selected' : '' ?>>3rd Year</option>
-            <option value="4th" <?= $student['year_level'] == '4th' ? 'selected' : '' ?>>4th Year</option>
-            <option value="5th" <?= $student['year_level'] == '5th' ? 'selected' : '' ?>>5th Year</option>
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label>Academic Term:</label>
-        <select name="academic_term" class="form-control" required>
-            <option value="">-- Select Term --</option>
-            <option value="1st Term" <?= $student['academic_term'] == '1st Term' ? 'selected' : '' ?>>1st Term</option>
-            <option value="2nd Term" <?= $student['academic_term'] == '2nd Term' ? 'selected' : '' ?>>2nd Term</option>
-            <option value="3rd Term" <?= $student['academic_term'] == '3rd Term' ? 'selected' : '' ?>>3rd Term</option>
-        </select>
-    </div>
-    
-    <hr>
-    <div class="mb-3"><label>Username:</label>
-        <input type="text" name="username" value="<?= htmlspecialchars($student['username']) ?>" class="form-control">
-    </div>
-    <div class="mb-3">
-        <label>New Password (leave blank to keep current password):</label>
-        <input type="password" name="password" class="form-control">
-    </div>
-    <button type="submit" class="btn btn-primary">Update Student</button>
-    <a href="manage-students.php" class="btn btn-secondary">Back</a>
-</form>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.getElementById('editStudentForm').addEventListener('submit', function(e) {
     e.preventDefault();
