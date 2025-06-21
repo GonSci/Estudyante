@@ -41,8 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contact_number  = trim($_POST['contact_number']);
     $email           = trim($_POST['email']);
     $program         = trim($_POST['program']);
-    $enrollment_year = $_POST['enrollment_year'];
-    $semester        = $_POST['semester'];
+    $year_level = $_POST['year_level'];
+    $academic_term        = $_POST['academic_term'];
     $username        = trim($_POST['username']);
     $password        = $_POST['password']; // Optional new password
 
@@ -73,20 +73,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("UPDATE students SET 
                 first_name = ?, middle_name = ?, last_name = ?, date_of_birth = ?, address = ?, contact_number = ?, 
-                email = ?, program = ?, enrollment_year = ?, semester = ?, username = ?, password = ?
+                email = ?, program = ?, year_level = ?, academic_term = ?, username = ?, password = ?
                 WHERE id = ?");
             $stmt->bind_param("ssssssssssssi",
                 $first_name, $middle_name, $last_name, $date_of_birth, $address, $contact_number,
-                $email, $program, $enrollment_year, $semester, $username, $hashedPassword, $student_id
+                $email, $program, $year_level, $academic_term, $username, $hashedPassword, $student_id
             );
         } else {
             $stmt = $conn->prepare("UPDATE students SET 
                 first_name = ?, middle_name = ?, last_name = ?, date_of_birth = ?, address = ?, contact_number = ?, 
-                email = ?, program = ?, enrollment_year = ?, semester = ?, username = ?
+                email = ?, program = ?, year_level = ?, academic_term = ?, username = ?
                 WHERE id = ?");
             $stmt->bind_param("sssssssssssi",
                 $first_name, $middle_name, $last_name, $date_of_birth, $address, $contact_number,
-                $email, $program, $enrollment_year, $semester, $username, $student_id
+                $email, $program, $year_level, $academic_term, $username, $student_id
             );
         }
 
@@ -180,26 +180,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </select>
     </div>
 
-    <div class="mb-3"><label>Enrollment Year:</label>
-        <input type="number" 
-               name="enrollment_year" 
-               class="form-control" 
-               value="<?= htmlspecialchars($student['enrollment_year']) ?>" 
-               min="1900" max="<?= date('Y') ?>" 
-               required>
-    </div>
     <div class="mb-3">
-        <label>Semester:</label>
-        <select name="semester" class="form-control" required>
-            <?php
-            $semesters = ["1st", "2nd", "3rd", "4th", "5th", "Summer"];
-            foreach ($semesters as $sem) {
-                $selected = ($student['semester'] === $sem) ? "selected" : "";
-                echo "<option value=\"$sem\" $selected>$sem</option>";
-            }
-            ?>
+    <label>Year Level:</label>
+        <select name="year_level" class="form-control">
+            <option value="">-- Select Year --</option>
+            <option value="1st" <?= $student['year_level'] == '1st' ? 'selected' : '' ?>>1st Year</option>
+            <option value="2nd" <?= $student['year_level'] == '2nd' ? 'selected' : '' ?>>2nd Year</option>
+            <option value="3rd" <?= $student['year_level'] == '3rd' ? 'selected' : '' ?>>3rd Year</option>
+            <option value="4th" <?= $student['year_level'] == '4th' ? 'selected' : '' ?>>4th Year</option>
+            <option value="5th" <?= $student['year_level'] == '5th' ? 'selected' : '' ?>>5th Year</option>
         </select>
     </div>
+
+    <div class="mb-3">
+        <label>Academic Term:</label>
+        <select name="academic_term" class="form-control" required>
+            <option value="">-- Select Term --</option>
+            <option value="1st Term" <?= $student['academic_term'] == '1st Term' ? 'selected' : '' ?>>1st Term</option>
+            <option value="2nd Term" <?= $student['academic_term'] == '2nd Term' ? 'selected' : '' ?>>2nd Term</option>
+            <option value="3rd Term" <?= $student['academic_term'] == '3rd Term' ? 'selected' : '' ?>>3rd Term</option>
+        </select>
+    </div>
+    
     <hr>
     <div class="mb-3"><label>Username:</label>
         <input type="text" name="username" value="<?= htmlspecialchars($student['username']) ?>" class="form-control">

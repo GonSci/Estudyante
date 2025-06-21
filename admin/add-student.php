@@ -19,8 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contact_number  = trim($_POST['contact_number']);
     $email           = trim($_POST['email']);
     $program         = trim($_POST['program']);
-    $enrollment_year = trim($_POST['enrollment_year']);
-    $semester        = $_POST['semester'];
+    $year_level        = $_POST['year_level'];
+    $academic_term = trim($_POST['academic_term']);
     $username        = trim($_POST['username']);
     $password        = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $check_username->close();
 
                 $sql = "INSERT INTO students 
-                        (first_name, middle_name, last_name, date_of_birth, address, contact_number, email, program, enrollment_year, semester, username, password, created_at)
+                        (first_name, middle_name, last_name, date_of_birth, address, contact_number, email, program, year_level, academic_term, username, password, created_at)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
                 $stmt = $conn->prepare($sql);
                 if (!$stmt) {
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->bind_param(
                         "ssssssssssss",
                         $first_name, $middle_name, $last_name, $date_of_birth, $address, $contact_number,
-                        $email, $program, $enrollment_year, $semester, $username, $password
+                        $email, $program, $year_level, $academic_term, $username, $password
                     );
                     if ($stmt->execute()) {
                         // Get the new student's ID
@@ -145,22 +145,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </select>
     </div>
     <div class="mb-3">
-        <label>Enrollment Year:</label>
-        <input type="number" name="enrollment_year" min="2023" max="<?= date('Y') ?>" class="form-control" placeholder="e.g., 2023" required
-            value="<?= isset($_POST['enrollment_year']) ? htmlspecialchars($_POST['enrollment_year']) : '' ?>">
-    </div>
-    <div class="mb-3">
-        <label>Semester:</label>
-        <select name="semester" class="form-control">
+        <label>Year Level:</label>
+        <select name="year_level" class="form-control">
             <option value="">-- Select Year --</option>
-            <option value="1st" <?= (isset($_POST['semester']) && $_POST['semester'] == '1st') ? 'selected' : '' ?>>1st Year</option>
-            <option value="2nd" <?= (isset($_POST['semester']) && $_POST['semester'] == '2nd') ? 'selected' : '' ?>>2nd Year</option>
-            <option value="3rd" <?= (isset($_POST['semester']) && $_POST['semester'] == '3rd') ? 'selected' : '' ?>>3rd Year</option>
-            <option value="4th" <?= (isset($_POST['semester']) && $_POST['semester'] == '4th') ? 'selected' : '' ?>>4th Year</option>
-            <option value="5th" <?= (isset($_POST['semester']) && $_POST['semester'] == '5th') ? 'selected' : '' ?>>5th Year</option>
-            <option value="Summer" <?= (isset($_POST['semester']) && $_POST['semester'] == 'Summer') ? 'selected' : '' ?>>Summer</option>
+            <option value="1st" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '1st') ? 'selected' : '' ?>>1st Year</option>
+            <option value="2nd" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '2nd') ? 'selected' : '' ?>>2nd Year</option>
+            <option value="3rd" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '3rd') ? 'selected' : '' ?>>3rd Year</option>
+            <option value="4th" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '4th') ? 'selected' : '' ?>>4th Year</option>
+            <option value="5th" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '5th') ? 'selected' : '' ?>>5th Year</option>
         </select>
     </div>
+
+    <div class="mb-3">
+        <label>Academic Term:</label>
+        <select name="academic_term" class="form-control" required>
+            <option value="">-- Select Term --</option>
+            <option value="1st Term" <?= (isset($_POST['academic_term']) && $_POST['academic_term'] == '1st Term') ? 'selected' : '' ?>>1st Term</option>
+            <option value="2nd Term" <?= (isset($_POST['academic_term']) && $_POST['academic_term'] == '2nd Term') ? 'selected' : '' ?>>2nd Term</option>
+            <option value="3rd Term" <?= (isset($_POST['academic_term']) && $_POST['academic_term'] == '3rd Term') ? 'selected' : '' ?>>3rd Term</option>
+        </select>
+    </div>
+
     <hr>
     <div class="mb-3">
         <label>Username:</label>
