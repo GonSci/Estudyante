@@ -1,5 +1,38 @@
 <?php include 'navbar.php'; ?>
 
+<style>
+
+
+h2 {
+    color:rgb(0, 3, 10);
+    margin-bottom: 1rem;
+}
+
+.profile-table {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.profile-table th {
+    background: #3b82f6;
+    color: white;
+    font-weight: 600;
+    padding: 12px 15px;
+    width: 180px;
+}
+
+.profile-table td {
+    padding: 12px 15px;
+    color: #374151;
+}
+
+.profile-table tr:nth-child(even) {
+    background: #f8fafc;
+}
+</style>
+
 <?php
 include '../includes/db.php';
 
@@ -16,10 +49,9 @@ $_SESSION['username'] = $username;
 $_SESSION['role'] = 'student';
 ?>
 
-<p>Welcome, <?= $student['first_name'] ." " . $student['middle_name'] ." ". $student['last_name']?></p>
-
 <h2>My Profile</h2>
-<table class="table table-bordered">
+
+<table class="table table-bordered profile-table">
     <tr><th>Student ID</th><td><?= htmlspecialchars($student['id']) ?></td></tr>
     <tr><th>First Name</th><td><?= htmlspecialchars($student['first_name']) ?></td></tr>
     <tr><th>Middle Name</th><td><?= htmlspecialchars($student['middle_name']) ?></td></tr>
