@@ -1,24 +1,22 @@
 <?php
-include 'header.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Include database connection, but NOT the header yet
 include '../includes/db.php';
 
-// Fetch all existing courses for prerequisites dropdown
-$all_courses = $conn->query("SELECT id, title FROM courses");
-$programs = $conn->query("SELECT DISTINCT program_code FROM program_course UNION SELECT DISTINCT program AS program_code FROM students");
-?>
-
-<h3>Add New Course</h3>
-
-<?php
+// Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title         = trim($_POST['title']);
     $description   = trim($_POST['description']);
     $credits       = intval($_POST['credits']);
     $max_capacity  = intval($_POST['max_capacity']);
     $prerequisites = isset($_POST['prerequisites']) ? $_POST['prerequisites'] : [];
+    $year_level    = $_POST['year_level'];
+    $academic_term = $_POST['academic_term'];
 
-    if (empty($title) || empty($description) || $credits <= 0 || $max_capacity <= 0) {
-        echo "<p class='text-danger'>Please fill in all required fields.</p>";
+    if (empty($title) || empty($description) || $credits <= 0 || $max_capacity <= 0 || empty($_POST['year_level']) || empty($_POST['academic_term'])) {
+        echo "<p class='text-danger'>Please fill in all required fields including Year Level and Academic Term.</p>";
     } else {
         $stmt = $conn->prepare("INSERT INTO courses (title, description, credits, max_capacity) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("ssii", $title, $description, $credits, $max_capacity);
@@ -40,8 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($assigned_programs as $program_code) {
                 $program_code = trim($program_code);
                 if ($program_code !== '') {
-                    $assign_stmt = $conn->prepare("INSERT INTO program_course (program_code, course_id) VALUES (?, ?)");
-                    $assign_stmt->bind_param("si", $program_code, $course_id);
+                    $assign_stmt = $conn->prepare("INSERT INTO program_course (program_code, course_id, year_level, academic_term) VALUES (?, ?, ?, ?)");
+                    $assign_stmt->bind_param("siss", $program_code, $course_id, $year_level, $academic_term);
                     $assign_stmt->execute();
                     $assign_stmt->close();
                 }
@@ -55,7 +53,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }
 }
+
+// Only include the header AFTER all possible redirects
+include 'header.php';
+
+// Fetch all existing courses for prerequisites dropdown
+$all_courses = $conn->query("SELECT id, title FROM courses");
+$programs = $conn->query("SELECT program_code, program_name FROM programs ORDER BY program_code")
 ?>
+
+<h3>Add New Course</h3>
 
 <form method="POST" action="">
     <div class="mb-3">
@@ -92,12 +99,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php while ($row = $programs->fetch_assoc()): ?>
                 <option value="<?= htmlspecialchars($row['program_code']) ?>"
                     <?= (isset($_POST['programs']) && in_array($row['program_code'], $_POST['programs'])) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($row['program_code']) ?>
+                    <?= htmlspecialchars($row['program_code']) ?> - <?= htmlspecialchars($row['program_name']) ?>
                 </option>
             <?php endwhile; ?>
         </select>
         <small class="form-text text-muted">Hold Ctrl (Windows) or Command (Mac) to select multiple programs.</small>
     </div>
+
+    <div class="mb-3">
+        <label>Year Level:</label>
+        <select name="year_level" class="form-control" required>
+            <option value="">-- Select Year --</option>
+            <option value="1st" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '1st') ? 'selected' : '' ?>>1st Year</option>
+            <option value="2nd" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '2nd') ? 'selected' : '' ?>>2nd Year</option>
+            <option value="3rd" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '3rd') ? 'selected' : '' ?>>3rd Year</option>
+            <option value="4th" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '4th') ? 'selected' : '' ?>>4th Year</option>
+
+        </select>
+    </div>
+
+
+    <div class="mb-3">
+        <label>Academic Term:</label>
+        <select name="academic_term" class="form-control" required>
+            <option value="">-- Select Term --</option>
+            <option value="1st Term" <?= (isset($_POST['academic_term']) && $_POST['academic_term'] == '1st Term') ? 'selected' : '' ?>>1st Term</option>
+            <option value="2nd Term" <?= (isset($_POST['academic_term']) && $_POST['academic_term'] == '2nd Term') ? 'selected' : '' ?>>2nd Term</option>
+            <option value="3rd Term" <?= (isset($_POST['academic_term']) && $_POST['academic_term'] == '3rd Term') ? 'selected' : '' ?>>3rd Term</option>
+        </select>
+    </div>
+
     <button type="submit" class="btn btn-primary">Add Course</button>
     <a href="manage-courses.php" class="btn btn-secondary">Back</a>
 </form>
