@@ -390,7 +390,7 @@ include 'header.php';
                 <div class="form-group full-width">
                     <label class="form-label required">Email Address</label>
                     <input type="email" name="email" class="form-input" required 
-                           placeholder="juan.delacruz@example.com"
+                           placeholder="juanDelacruz@example.com"
                            value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>">
                 </div>
             </div>
