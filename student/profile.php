@@ -60,8 +60,8 @@ $_SESSION['role'] = 'student';
     <tr><th>Address</th><td><?= htmlspecialchars($student['address']) ?></td></tr>
     <tr><th>Contact Number</th><td><?= htmlspecialchars($student['contact_number']) ?></td></tr>
     <tr><th>Program</th><td><?= htmlspecialchars($student['program']) ?></td></tr>
-    <tr><th>Enrollment Year</th><td><?= htmlspecialchars($student['enrollment_year']) ?></td></tr>
-    <tr><th>Semester</th><td><?= htmlspecialchars($student['semester']) ?></td></tr>
+    <tr><th>Enrollment Year</th><td><?= htmlspecialchars($student['year_level']) ?></td></tr>
+    <tr><th>Semester</th><td><?= htmlspecialchars($student['academic_term']) ?></td></tr>
     <tr><th>Username</th><td><?= htmlspecialchars($student['username']) ?></td></tr>
 </table>
 
