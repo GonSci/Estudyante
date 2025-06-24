@@ -56,15 +56,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Only include the header AFTER all possible redirects
 include 'header.php';
+?>
 
+<style>
+    .text-primary-custom {
+        color: hsl(217, 65.90%, 25.30%) !important;
+    }
+</style>
+
+<?php
 // Fetch all existing courses for prerequisites dropdown
 $all_courses = $conn->query("SELECT id, title FROM courses");
 $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER BY program_code")
 ?>
 
 <div class="card mb-4 shadow-sm">
-    <div class="card-header bg-primary text-white">
-        <h3 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Course</h3>
+<div class="card-header" style="background-color: hsl(217, 65.90%, 25.30%); color: white;">
+    <h3 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Course</h3>
     </div>
     <div class="card-body">
         <form method="POST" action="">
@@ -72,13 +80,13 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
             <div class="row mb-3">
                 <div class="col-md-8">
                     <div class="mb-3">
-                        <label class="form-label fw-bold"><i class="fas fa-book me-1 text-primary"></i> Course Title:</label>
+                        <label class="form-label fw-bold"><i class="fas fa-book me-1 text-primary-custom"></i> Course Title:</label>
                         <input type="text" name="title" class="form-control" required value="<?= isset($_POST['title']) ? htmlspecialchars($_POST['title']) : '' ?>" placeholder="Enter course title">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="mb-3">
-                        <label class="form-label fw-bold"><i class="fas fa-calculator me-1 text-primary"></i> Units:</label>
+                        <label class="form-label fw-bold"><i class="fas fa-calculator me-1 text-primary-custom"></i> Units:</label>
                         <input type="number" name="credits" class="form-control" min="1" required value="<?= isset($_POST['credits']) ? htmlspecialchars($_POST['credits']) : '' ?>" placeholder="Enter course units (e.g. 3)">
                     </div>
                 </div>
@@ -86,7 +94,7 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
             
             <!-- Description -->
             <div class="mb-4">
-                <label class="form-label fw-bold"><i class="fas fa-align-left me-1 text-primary"></i> Description:</label>
+                <label class="form-label fw-bold"><i class="fas fa-align-left me-1 text-primary-custom"></i> Description:</label>
                 <textarea name="description" class="form-control" rows="3" required><?= isset($_POST['description']) ? htmlspecialchars($_POST['description']) : '' ?></textarea>
             </div>
             
@@ -96,7 +104,7 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label class="form-label fw-bold"><i class="fas fa-arrows-alt-h me-1 text-primary"></i> Prerequisites:</label>
+                        <label class="form-label fw-bold"><i class="fas fa-arrows-alt-h me-1 text-primary-custom"></i> Prerequisites:</label>
                         <select name="prerequisites[]" class="form-select" multiple style="height: 150px;">
                             <?php while ($row = $all_courses->fetch_assoc()): ?>
                                 <option value="<?= $row['id'] ?>"
@@ -110,7 +118,7 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label class="form-label fw-bold"><i class="fas fa-graduation-cap me-1 text-primary"></i> Assign to Program(s):</label>
+                        <label class="form-label fw-bold"><i class="fas fa-graduation-cap me-1 text-primary-custom"></i> Assign to Program(s):</label>
                         <select name="programs[]" class="form-select" multiple style="height: 150px;">
                             <?php while ($row = $programs->fetch_assoc()): ?>
                                 <option value="<?= htmlspecialchars($row['program_code']) ?>"
@@ -127,25 +135,23 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
             <div class="row">
                 <div class="col-md-4">
                     <div class="mb-3">
-                        <label class="form-label fw-bold"><i class="fas fa-users me-1 text-primary"></i> Max Capacity:</label>
+                        <label class="form-label fw-bold"><i class="fas fa-users me-1 text-primary-custom"></i> Max Capacity:</label>
                         <input type="number" name="max_capacity" class="form-control" min="1" required value="<?= isset($_POST['max_capacity']) ? htmlspecialchars($_POST['max_capacity']) : '' ?>" placeholder="Enter max capacity (e.g. 30)">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="mb-3">
-                        <label class="form-label fw-bold"><i class="fas fa-layer-group me-1 text-primary"></i> Year Level:</label>
+                        <label class="form-label fw-bold"><i class="fas fa-layer-group me-1 text-primary-custom"></i> Year Level:</label>
                         <select name="year_level" class="form-select" required>
                             <option value="">-- Select Year --</option>
                             <option value="1st" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '1st') ? 'selected' : '' ?>>1st Year</option>
-                            <option value="2nd" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '2nd') ? 'selected' : '' ?>>2nd Year</option>
-                            <option value="3rd" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '3rd') ? 'selected' : '' ?>>3rd Year</option>
-                            <option value="4th" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '4th') ? 'selected' : '' ?>>4th Year</option>
+
                         </select>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="mb-3">
-                        <label class="form-label fw-bold"><i class="fas fa-calendar-alt me-1 text-primary"></i> Academic Term:</label>
+                        <label class="form-label fw-bold"><i class="fas fa-calendar-alt me-1 text-primary-custom"></i> Academic Term:</label>
                         <select name="academic_term" class="form-select" required>
                             <option value="">-- Select Term --</option>
                             <option value="1st Term" <?= (isset($_POST['academic_term']) && $_POST['academic_term'] == '1st Term') ? 'selected' : '' ?>>1st Term</option>
@@ -161,7 +167,8 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
             <!-- Form Actions -->
             <div class="d-flex justify-content-end">
                 <a href="manage-courses.php" class="btn btn-secondary me-2"><i class="fas fa-times me-1"></i> Cancel</a>
-                <button type="button" class="btn btn-primary" id="addCourseBtn"><i class="fas fa-save me-1"></i> Add Course</button>
+                <!-- Change the add button color: -->
+                <button type="button" class="btn" id="addCourseBtn" style="background-color: hsl(217, 65.90%, 25.30%); color: white;"><i class="fas fa-save me-1"></i> Add Course</button>
             </div>
         </form>
     </div>

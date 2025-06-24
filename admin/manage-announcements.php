@@ -1,12 +1,14 @@
 <?php
+
 session_start();
 
+// Check authentication first
 if($_SESSION['role'] !== 'admin'){
     header("Location: ../login.php");
     exit;
 }
 
-include 'header.php';
+// Include database connection first (no output)
 include '../includes/db.php';
 
 // Handle announcement actions (delete, activate, deactivate)
@@ -15,7 +17,7 @@ if(isset($_GET['action']) && isset($_GET['id'])) {
     
     if($_GET['action'] == 'delete') {
         $conn->query("DELETE FROM announcements WHERE id = $id");
-        header("Location: manage-announcements.php?msg=deleted");
+        header("Location: dashboard.php?msg=deleted"); // Fixed path (removed "admin/")
         exit;
     } 
     else if($_GET['action'] == 'activate') {
@@ -29,6 +31,9 @@ if(isset($_GET['action']) && isset($_GET['id'])) {
         exit;
     }
 }
+
+// NOW include the header (after all redirects)
+include 'header.php';
 
 // Get all announcements
 $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at DESC");
