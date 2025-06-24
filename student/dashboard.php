@@ -68,8 +68,25 @@ $announcements = $conn->query("
                             <i class="fas fa-graduation-cap fa-2x text-primary"></i>
                         </div>
                         <div>
-                            <h6 class="mb-0">Current Semester</h6>
-                            <p class="text-muted mb-0">Fall 2025</p>
+                            <?php
+                            $username = $_SESSION['username'];
+                            $stmt = $conn->prepare("SELECT academic_term, year_level FROM students WHERE username = ?");
+                            $stmt->bind_param("s", $username);
+                            $stmt->execute();
+                            $result = $stmt->get_result();
+
+                            if($result->num_rows > 0) {
+                                $student_info = $result->fetch_assoc();
+                                $academic_term = htmlspecialchars($student_info['academic_term']);
+                                $year_level = htmlspecialchars($student_info['year_level']);
+                            } else {
+                                $academic_term = 'N/A';
+                                $year_level = 'N/A';
+                            }
+                            $stmt->close();
+                            ?>
+                            <h6 class="mb-0">Status</h6>
+                            <p class="text-muted mb-0"><?= $year_level . ' year (' . $academic_term . ')'?></p>
                         </div>
                     </div>
                     
@@ -98,7 +115,7 @@ $announcements = $conn->query("
                 <div class="card h-100 shadow-sm">
                     <div class="card-header bg-warning text-dark">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Announcements</h5>
+                            <h5 class="mb-0"> 📣 Announcements</h5>
                             <span class="badge bg-danger"><?= $announcements->num_rows ?> New</span>
                         </div>
                     </div>

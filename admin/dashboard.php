@@ -99,7 +99,7 @@ if ($table_check->num_rows > 0) {
             
             <div class="row">
                 <div class="col-lg-6">
-                    <h5><i class="fas fa-plus-circle me-2 text-primary"></i>Create New Announcement</h5>
+                    <h5><i class="fas fa-pencil-square me-2 text-primary"></i>Create New Announcement</h5>
                     <form method="POST" action="">
                         <div class="mb-3">
                             <label for="announcement_title" class="form-label">Title</label>
