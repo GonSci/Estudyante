@@ -45,6 +45,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin'){
             <li class="nav-item"><a href="manage-announcements.php" class="nav-link"><i class="fas fa-bullhorn"></i>Manage Announcements</a></li>
             <li class="nav-item"><a href="manage-students.php" class="nav-link"><i class="fas fa-user-graduate"></i>Manage Students</a></li>
             <li class="nav-item"><a href="manage-courses.php" class="nav-link"><i class="fas fa-book"></i>Manage Courses</a></li>
+            <li class="nav-item"><a href="manage-payments.php" class="nav-link"><i class="fas fa-credit-card"></i>Manage Payments</a></li>
             <li class="nav-item"><a href="view-curriculum.php" class="nav-link"><i class="fas fa-clipboard-list"></i>View Curriculum</a></li>
 
         </ul>

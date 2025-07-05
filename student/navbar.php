@@ -53,7 +53,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
                 </a>
             </li>
             <li class="nav-item">
-                <a href="register-course.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'register-course.php' ? 'active' : '' ?>">
+                <a href="payments.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'payments.php' ? 'active' : '' ?>">
                     <i class="fas fa-credit-card"></i> Payments
                 </a>
             </li>

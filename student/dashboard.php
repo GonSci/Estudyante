@@ -142,11 +142,11 @@ $announcements = $conn->query("
             <div class="card h-100 shadow-sm">
                 <div class="card-body text-center">
                     <div class="icon-wrapper mb-3">
-                        <i class="fas fa-edit fa-3x text-primary"></i>
+                        <i class="fas fa-credit-card fa-3x text-primary"></i>
                     </div>
-                    <h5>Course Registration</h5>
-                    <p class="text-muted">Register for new courses or view your current schedule</p>
-                    <a href="register-course.php" class="btn btn-primary">Register Now</a>
+                    <h5>Payments & Fees</h5>
+                    <p class="text-muted">View and manage your tuition fees and payment records</p>
+                    <a href="payments.php" class="btn btn-primary">View Payments</a>
                 </div>
             </div>
         </div>

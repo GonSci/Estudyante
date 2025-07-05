@@ -45,9 +45,6 @@
                                     <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
                                         <i class="fas fa-key me-1"></i> Change Password
                                     </button>
-                                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#updateProfileModal">
-                                        <i class="fas fa-edit me-1"></i> Update Information
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -153,54 +150,6 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="changePasswordBtn">Change Password</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Update Profile Modal -->
-<div class="modal fade" id="updateProfileModal" tabindex="-1" aria-labelledby="updateProfileModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header" style="background-color: hsl(217, 65.90%, 25.30%); color: white;">
-                <h5 class="modal-title" id="updateProfileModalLabel">Update Profile Information</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="updateProfileForm">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="contactNumber" class="form-label">Contact Number</label>
-                            <input type="text" class="form-control" id="contactNumber" value="<?= htmlspecialchars($student['contact_number']) ?>">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="emailAddress" class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="emailAddress" value="student@example.com">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="address" class="form-label">Address</label>
-                        <textarea class="form-control" id="address" rows="3"><?= htmlspecialchars($student['address']) ?></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Emergency Contact</label>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <input type="text" class="form-control" placeholder="Name" id="emergencyName">
-                            </div>
-                            <div class="col-md-6">
-                                <input type="text" class="form-control" placeholder="Relationship" id="emergencyRelationship">
-                            </div>
-                            <div class="col-md-6">
-                                <input type="text" class="form-control" placeholder="Contact Number" id="emergencyContact">
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary">Save Changes</button>
             </div>
         </div>
     </div>
