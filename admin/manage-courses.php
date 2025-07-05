@@ -1,14 +1,23 @@
 <?php include 'header.php'; ?>
 <?php include '../includes/db.php'; ?>
 
-<h3>Manage Courses</h3>
+<!-- Link to shared admin CSS file -->
+<link rel="stylesheet" href="css/admin-common.css">
 
 <?php
-// Get filter parameter
+// Get filter and sort parameters
 $program_filter = isset($_GET['program']) ? trim($_GET['program']) : '';
+$sort_by = isset($_GET['sort']) ? $_GET['sort'] : 'title';
+$sort_order = isset($_GET['order']) && $_GET['order'] === 'desc' ? 'desc' : 'asc';
+
+// Validate sort field
+$allowed_sorts = ['title', 'credits', 'year_level', 'academic_term', 'max_capacity'];
+if (!in_array($sort_by, $allowed_sorts)) {
+    $sort_by = 'title';
+}
 
 // Pagination settings
-$records_per_page = 10; // Number of courses per page
+$records_per_page = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $records_per_page;
 
@@ -25,16 +34,34 @@ $count_result = $conn->query($count_query);
 $total_records = $count_result->fetch_assoc()['total'];
 $total_pages = ceil($total_records / $records_per_page);
 
-// Base query for fetching courses with pagination
-$query = "SELECT DISTINCT c.* FROM courses c";
+// Base query for fetching courses with pagination and sorting
+if ($sort_by === 'year_level' || $sort_by === 'academic_term') {
+    // For year_level and academic_term, we need to join with program_course
+    $query = "SELECT DISTINCT c.*, pc.year_level, pc.academic_term FROM courses c 
+              LEFT JOIN program_course pc ON c.id = pc.course_id";
+} else {
+    // For other fields, use the main courses table
+    $query = "SELECT DISTINCT c.* FROM courses c";
+}
 
 // Add join and where clause if filtering by program
 if (!empty($program_filter)) {
-    $query .= " JOIN program_course pc ON c.id = pc.course_id 
-                WHERE pc.program_code = '" . $conn->real_escape_string($program_filter) . "'";
+    if ($sort_by === 'year_level' || $sort_by === 'academic_term') {
+        $query .= " WHERE pc.program_code = '" . $conn->real_escape_string($program_filter) . "'";
+    } else {
+        $query .= " JOIN program_course pc ON c.id = pc.course_id 
+                    WHERE pc.program_code = '" . $conn->real_escape_string($program_filter) . "'";
+    }
 }
 
-$query .= " ORDER BY c.title LIMIT $offset, $records_per_page";
+// Add ORDER BY clause
+if ($sort_by === 'year_level' || $sort_by === 'academic_term') {
+    $query .= " ORDER BY pc.$sort_by $sort_order, c.title ASC";
+} else {
+    $query .= " ORDER BY c.$sort_by $sort_order";
+}
+
+$query .= " LIMIT $offset, $records_per_page";
 $result = $conn->query($query);
 
 if (!$result) {
@@ -43,7 +70,6 @@ if (!$result) {
     exit;
 }
 
-// Count displayed results
 $result_count = $result->num_rows;
 
 function getPrerequisiteTitles($conn, $course_id) {
@@ -71,203 +97,435 @@ function getAssignedPrograms($conn, $course_id) {
     $stmt->close();
     return $programs;
 }
+
+function getCourseYearAndTerm($conn, $course_id) {
+    $stmt = $conn->prepare("SELECT DISTINCT year_level, academic_term FROM program_course WHERE course_id = ? ORDER BY year_level, academic_term");
+    $stmt->bind_param("i", $course_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        $data[] = $row['year_level'] . ' - ' . $row['academic_term'];
+    }
+    $stmt->close();
+    return $data;
+}
+
+function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
+    $params = ['page' => $page_num];
+    if (!empty($program_filter)) {
+        $params['program'] = $program_filter;
+    }
+    if ($sort_by !== 'title') {
+        $params['sort'] = $sort_by;
+    }
+    if ($sort_order !== 'asc') {
+        $params['order'] = $sort_order;
+    }
+    return '?' . http_build_query($params);
+}
 ?>
 
-<style>
-    table th {
-        background-color: blue;
-        color: white;
-    }
-</style>
+<div class="container-fluid">
+    <!-- Modern Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2><i class="fas fa-book me-2"></i>Course Management</h2>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="add-course.php" class="btn btn-success-simple">
+                        <i class="fas fa-plus me-1"></i>Add Course
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- Top controls -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <a href="add-course.php" class="btn btn-success">Add Course</a>
-    
-    <!-- Program Filter -->
-    <div>
-        <form method="GET" action="" class="d-flex align-items-center">
-            <label for="program_filter" class="me-2">Filter by Program:</label>
-            <select name="program" id="program_filter" class="form-select me-2" style="width: 150px;">
-                <option value="">All Programs</option>
-                <?php
-                // Get unique programs
-                $programs_query = $conn->query("SELECT program_code, program_name FROM programs ORDER BY program_code");
-                while ($program = $programs_query->fetch_assoc()):
-                ?>
-                    <option value="<?= htmlspecialchars($program['program_code']) ?>" 
-                            <?= (isset($_GET['program']) && $_GET['program'] == $program['program_code']) ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($program['program_code']) ?>
-                    </option>
-                <?php endwhile; ?>
-            </select>
-            <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-            <?php if(isset($_GET['program']) && !empty($_GET['program'])): ?>
-                <a href="manage-courses.php" class="btn btn-secondary btn-sm ms-1">Clear</a>
+    <div class="container">
+        <!-- Simple Info Bar -->
+        <div class="text-muted mb-3 small">
+            <?php if (!empty($program_filter)): ?>
+                <i class="fas fa-filter me-1"></i>
+                Found <strong><?= $total_records ?></strong> course<?= ($total_records != 1) ? 's' : '' ?> for program 
+                "<strong><?= htmlspecialchars($program_filter) ?></strong>" 
+                (Showing <?= $result_count ?> on page <?= $page ?> of <?= $total_pages ?>)
+            <?php else: ?>
+                <i class="fas fa-books me-1"></i>
+                Showing <strong><?= $result_count ?></strong> of <strong><?= $total_records ?></strong> course<?= ($total_records != 1) ? 's' : '' ?>
+                (Page <?= $page ?> of <?= $total_pages ?>)
             <?php endif; ?>
-        </form>
+            
+            <?php if ($sort_by !== 'title' || $sort_order !== 'asc'): ?>
+                <span class="ms-2 text-primary">
+                    <i class="fas fa-sort me-1"></i>
+                    Sorted by: <strong>
+                        <?php
+                        switch($sort_by) {
+                            case 'title': echo 'Course Title'; break;
+                            case 'credits': echo 'Credits'; break;
+                            case 'year_level': echo 'Year Level'; break;
+                            case 'academic_term': echo 'Academic Term'; break;
+                            case 'max_capacity': echo 'Max Capacity'; break;
+                        }
+                        ?>
+                    </strong> (<?= ucfirst($sort_order) ?>)
+                </span>
+            <?php endif; ?>
+        </div>
+
+        <!-- Sorting Controls -->
+        <div class="sort-controls">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <span class="fw-bold text-muted">
+                    <i class="fas fa-sort me-1"></i>Sort by:
+                </span>
+                
+                <?php
+                function getSortUrl($field, $current_sort, $current_order, $program_filter) {
+                    $new_order = ($current_sort === $field && $current_order === 'asc') ? 'desc' : 'asc';
+                    $params = ['sort' => $field, 'order' => $new_order];
+                    if (!empty($program_filter)) {
+                        $params['program'] = $program_filter;
+                    }
+                    return '?' . http_build_query($params);
+                }
+                
+                function getSortIcon($field, $current_sort, $current_order) {
+                    if ($current_sort === $field) {
+                        return $current_order === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+                    }
+                    return 'fas fa-sort';
+                }
+                
+                $sort_options = [
+                    'title' => 'Course Title',
+                    'credits' => 'Credits',
+                    'year_level' => 'Year Level',
+                    'academic_term' => 'Academic Term',
+                    'max_capacity' => 'Max Capacity'
+                ];
+                
+                foreach ($sort_options as $field => $label):
+                    $is_active = $sort_by === $field;
+                    $url = getSortUrl($field, $sort_by, $sort_order, $program_filter);
+                    $icon = getSortIcon($field, $sort_by, $sort_order);
+                ?>
+                    <a href="<?= $url ?>" class="sort-link <?= $is_active ? 'active' : '' ?>">
+                        <?= $label ?>
+                        <i class="<?= $icon ?> sort-arrow"></i>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <!-- Program Filter -->
+        <div class="search-section">
+            <form method="GET" action="" class="row align-items-center">
+                <input type="hidden" name="sort" value="<?= htmlspecialchars($sort_by) ?>">
+                <input type="hidden" name="order" value="<?= htmlspecialchars($sort_order) ?>">
+                <div class="col-md-8">
+                    <label for="program_filter" class="form-label">Filter by Program:</label>
+                    <select name="program" id="program_filter" class="form-select">
+                        <option value="">All Programs</option>
+                        <?php
+                        $programs_query = $conn->query("SELECT program_code, program_name FROM programs ORDER BY program_code");
+                        while ($program = $programs_query->fetch_assoc()):
+                        ?>
+                            <option value="<?= htmlspecialchars($program['program_code']) ?>" 
+                                    <?= (isset($_GET['program']) && $_GET['program'] == $program['program_code']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($program['program_code']) ?> - <?= htmlspecialchars($program['program_name']) ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+                <div class="col-md-4 mt-2 mt-md-0">
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary-simple">
+                            <i class="fas fa-filter me-1"></i>Filter
+                        </button>
+                        <?php if(isset($_GET['program']) && !empty($_GET['program'])): ?>
+                            <a href="<?= buildPageUrl(1, '', $sort_by, $sort_order) ?>" class="btn btn-secondary-simple">
+                                <i class="fas fa-times me-1"></i>Clear
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <?php if ($result_count > 0): ?>
+            <!-- Courses Table -->
+            <div class="courses-table-container">
+                <div class="table-header">
+                    <h5><i class="fas fa-table me-2"></i>Course Records (<?= $result_count ?>)</h5>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table modern-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-book me-1"></i>Course</th>
+                                <th><i class="fas fa-align-left me-1"></i>Description</th>
+                                <th><i class="fas fa-credit-card me-1"></i>Credits</th>
+                                <th><i class="fas fa-layer-group me-1"></i>Year/Term</th>
+                                <th><i class="fas fa-link me-1"></i>Prerequisites</th>
+                                <th><i class="fas fa-users me-1"></i>Capacity</th>
+                                <th><i class="fas fa-graduation-cap me-1"></i>Programs</th>
+                                <th><i class="fas fa-cogs me-1"></i>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td data-label="Course">
+                                    <div class="course-title"><?= htmlspecialchars($row['title']) ?></div>
+                                    <div class="course-code">ID: <?= $row['id'] ?></div>
+                                </td>
+                                <td data-label="Description">
+                                    <div class="text-truncate" style="max-width: 200px;" title="<?= htmlspecialchars($row['description']) ?>">
+                                        <?= htmlspecialchars(substr($row['description'], 0, 100)) ?>
+                                        <?= strlen($row['description']) > 100 ? '...' : '' ?>
+                                    </div>
+                                </td>
+                                <td data-label="Credits">
+                                    <span class="credits-badge">
+                                        <?= htmlspecialchars($row['credits']) ?> units
+                                    </span>
+                                </td>
+                                <td data-label="Year/Term">
+                                    <?php
+                                        $yearTerms = getCourseYearAndTerm($conn, $row['id']);
+                                        if ($yearTerms):
+                                            foreach($yearTerms as $yearTerm):
+                                    ?>
+                                        <span class="year-term-badge"><?= htmlspecialchars($yearTerm) ?></span>
+                                    <?php 
+                                            endforeach;
+                                        else:
+                                    ?>
+                                        <span class="text-muted"><i class="fas fa-minus"></i> Not Set</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td data-label="Prerequisites">
+                                    <?php
+                                        $prereqs = getPrerequisiteTitles($conn, $row['id']);
+                                        if ($prereqs):
+                                            foreach($prereqs as $prereq):
+                                    ?>
+                                        <span class="prerequisite-item"><?= htmlspecialchars($prereq) ?></span>
+                                    <?php 
+                                            endforeach;
+                                        else:
+                                    ?>
+                                        <span class="text-muted"><i class="fas fa-minus"></i> None</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td data-label="Capacity">
+                                    <span class="capacity-badge">
+                                        <i class="fas fa-users me-1"></i><?= htmlspecialchars($row['max_capacity']) ?>
+                                    </span>
+                                </td>
+                                <td data-label="Programs">
+                                    <?php
+                                        $programs = getAssignedPrograms($conn, $row['id']);
+                                        if ($programs):
+                                            foreach($programs as $program):
+                                    ?>
+                                        <span class="program-badge"><?= htmlspecialchars($program) ?></span>
+                                    <?php 
+                                            endforeach;
+                                        else:
+                                    ?>
+                                        <span class="text-muted"><i class="fas fa-minus"></i> None</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td data-label="Actions">
+                                    <div class="action-buttons">
+                                        <a href="edit-course.php?id=<?= $row['id'] ?>" class="btn-action btn-edit">
+                                            <i class="fas fa-edit me-1"></i>
+                                        </a>
+                                        <button 
+                                            onclick="deleteCourse(<?= $row['id'] ?>, '<?= htmlspecialchars($row['title']) ?>')"
+                                            class="btn-action btn-delete">
+                                            <i class="fas fa-trash me-1"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Modern Pagination -->
+            <?php if ($total_pages > 1): ?>
+            <div class="pagination-container">
+                <nav>
+                    <ul class="pagination modern-pagination">
+                        <?php if ($page > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="<?= buildPageUrl(1, $program_filter, $sort_by, $sort_order) ?>">
+                                    <i class="fas fa-angle-double-left me-1"></i>First
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="<?= buildPageUrl($page-1, $program_filter, $sort_by, $sort_order) ?>">
+                                    <i class="fas fa-angle-left me-1"></i>Previous
+                                </a>
+                            </li>
+                        <?php else: ?>
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="fas fa-angle-double-left me-1"></i>First</span>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="fas fa-angle-left me-1"></i>Previous</span>
+                            </li>
+                        <?php endif; ?>
+
+                        <?php
+                        $range = 2;
+                        $start_page = max(1, $page - $range);
+                        $end_page = min($total_pages, $page + $range);
+                        
+                        for ($i = $start_page; $i <= $end_page; $i++):
+                        ?>
+                            <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                                <a class="page-link" href="<?= buildPageUrl($i, $program_filter, $sort_by, $sort_order) ?>">
+                                    <?= $i ?>
+                                </a>
+                            </li>
+                        <?php endfor; ?>
+
+                        <?php if ($page < $total_pages): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="<?= buildPageUrl($page+1, $program_filter, $sort_by, $sort_order) ?>">
+                                    Next<i class="fas fa-angle-right ms-1"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="<?= buildPageUrl($total_pages, $program_filter, $sort_by, $sort_order) ?>">
+                                    Last<i class="fas fa-angle-double-right ms-1"></i>
+                                </a>
+                            </li>
+                        <?php else: ?>
+                            <li class="page-item disabled">
+                                <span class="page-link">Next<i class="fas fa-angle-right ms-1"></i></span>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">Last<i class="fas fa-angle-double-right ms-1"></i></span>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
+            </div>
+            <?php endif; ?>
+
+        <?php else: ?>
+            <!-- Empty State -->
+            <div class="empty-state">
+                <i class="fas fa-book"></i>
+                <h5>No Courses Found</h5>
+                <p>
+                    <?php if (!empty($program_filter)): ?>
+                        No courses found for program "<strong><?= htmlspecialchars($program_filter) ?></strong>".
+                        <br>Try selecting a different program or browse all courses.
+                    <?php else: ?>
+                        There are no courses in the system yet.
+                        <br>Start by adding your first course to the database.
+                    <?php endif; ?>
+                </p>
+                <?php if (!empty($program_filter)): ?>
+                    <a href="manage-courses.php" class="btn btn-primary-simple me-2">
+                        <i class="fas fa-list me-1"></i>View All
+                    </a>
+                <?php endif; ?>
+                <a href="add-course.php" class="btn btn-success-simple">
+                    <i class="fas fa-plus me-1"></i>Add Course
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
-<!-- Results count -->
-<?php if (!empty($program_filter)): ?>
-    <div class="alert alert-info py-2 mb-3">
-        Showing <?= $result->num_rows ?> of <?= $total_records ?> course<?= ($total_records != 1) ? 's' : '' ?> 
-        for program: <strong><?= htmlspecialchars($program_filter) ?></strong>
-        (Page <?= $page ?> of <?= $total_pages ?>)
-    </div>
-<?php else: ?>
-    <div class="alert alert-info py-2 mb-3">
-        Showing <?= $result->num_rows ?> of <?= $total_records ?> course<?= ($total_records != 1) ? 's' : '' ?>
-        (Page <?= $page ?> of <?= $total_pages ?>)
-    </div>
-<?php endif; ?>
-
-<?php if ($result_count == 0): ?>
-    <div class="alert alert-warning">
-        No courses found<?= !empty($program_filter) ? ' for program ' . htmlspecialchars($program_filter) : '' ?>.
-    </div>
-<?php else: ?>
-    <!-- Responsive Table Container -->
-    <div class="table-responsive">
-        <!-- Courses Table -->
-        <table class="table table-bordered table-hover">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Units</th>
-                    <th>Prerequisites</th>
-                    <th>Max Capacity</th>
-                    <th>Programs</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $result->fetch_assoc()): ?>
-                <tr>
-                    <td><?= htmlspecialchars($row['title']) ?></td>
-                    <td>
-                        <div class="text-truncate" style="max-width: 200px;" title="<?= htmlspecialchars($row['description']) ?>">
-                            <?= htmlspecialchars($row['description']) ?>
-                        </div>
-                    </td>
-                    <td><?= htmlspecialchars($row['credits']) ?></td>
-                    <td>
-                        <?php
-                            $prereqs = getPrerequisiteTitles($conn, $row['id']);
-                            echo $prereqs ? htmlspecialchars(implode(', ', $prereqs)) : '<span class="text-muted">None</span>';
-                        ?>
-                    </td>
-                    <td><?= htmlspecialchars($row['max_capacity']) ?></td>
-                    <td>
-                        <?php
-                            $programs = getAssignedPrograms($conn, $row['id']);
-                            echo $programs ? htmlspecialchars(implode(', ', $programs)) : '<span class="text-muted">None</span>';
-                        ?>
-                    </td>
-                    <td>
-                        <div class="d-flex gap-1">
-                            <a href="edit-course.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
-                            <a href="delete-course.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger delete-btn"
-                                data-title="<?= htmlspecialchars($row['title']) ?>"
-                                data-id="<?= $row['id'] ?>"
-                            >Delete</a>
-                        </div>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pagination -->
-    <?php if ($total_pages > 1): ?>
-    <nav aria-label="Course pagination">
-        <ul class="pagination justify-content-center">
-            <?php if ($page > 1): ?>
-                <li class="page-item">
-                    <a class="page-link" href="?page=1<?= !empty($program_filter) ? '&program=' . urlencode($program_filter) : '' ?>">
-                        First
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page=<?= $page-1 ?><?= !empty($program_filter) ? '&program=' . urlencode($program_filter) : '' ?>">
-                        Previous
-                    </a>
-                </li>
-            <?php else: ?>
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">First</a>
-                </li>
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Previous</a>
-                </li>
-            <?php endif; ?>
-
-            <?php
-            // Calculate range of page numbers to show
-            $range = 2; // How many pages to show before and after current page
-            $start_page = max(1, $page - $range);
-            $end_page = min($total_pages, $page + $range);
-            
-            // Show page numbers
-            for ($i = $start_page; $i <= $end_page; $i++):
-            ?>
-                <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                    <a class="page-link" href="?page=<?= $i ?><?= !empty($program_filter) ? '&program=' . urlencode($program_filter) : '' ?>">
-                        <?= $i ?>
-                    </a>
-                </li>
-            <?php endfor; ?>
-
-            <?php if ($page < $total_pages): ?>
-                <li class="page-item">
-                    <a class="page-link" href="?page=<?= $page+1 ?><?= !empty($program_filter) ? '&program=' . urlencode($program_filter) : '' ?>">
-                        Next
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page=<?= $total_pages ?><?= !empty($program_filter) ? '&program=' . urlencode($program_filter) : '' ?>">
-                        Last
-                    </a>
-                </li>
-            <?php else: ?>
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Next</a>
-                </li>
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Last</a>
-                </li>
-            <?php endif; ?>
-        </ul>
-    </nav>
-    <?php endif; ?>
-<?php endif; ?>
-
+<!-- Enhanced JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const deleteButtons = document.querySelectorAll('.delete-btn');
-    deleteButtons.forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const url = this.getAttribute('href');
-            const title = this.getAttribute('data-title');
-            const id = this.getAttribute('data-id');
+function deleteCourse(id, title) {
+    Swal.fire({
+        title: 'Delete Course?',
+        html: `
+            <div class="text-start">
+                <p>This action will permanently remove:</p>
+                <div class="alert alert-warning">
+                    <strong>${title}</strong> (ID: ${id})
+                </div>
+                <p class="text-muted">This action cannot be undone. All course data will be lost.</p>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74a3b',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-trash me-2"></i>Yes, Delete',
+        cancelButtonText: '<i class="fas fa-times me-2"></i>Cancel',
+        reverseButtons: true,
+        customClass: {
+            popup: 'rounded-3',
+            confirmButton: 'fw-bold',
+            cancelButton: 'fw-bold'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading
             Swal.fire({
-                title: 'Are you sure?',
-                html: `This will permanently remove the course <b>${title} (ID: ${id})</b>. Continue?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = url;
+                title: 'Deleting...',
+                text: 'Please wait while we remove the course',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
                 }
             });
+            
+            // Redirect to delete
+            window.location.href = `delete-course.php?id=${id}`;
+        }
+    });
+}
+
+// Enhanced filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const programSelect = document.querySelector('select[name="program"]');
+    const filterForm = programSelect.closest('form');
+    
+    // Add visual feedback
+    programSelect.addEventListener('change', function() {
+        if (this.value) {
+            this.style.borderColor = '#4e73df';
+            this.style.background = 'white';
+        } else {
+            this.style.borderColor = '#e9ecef';
+            this.style.background = '#f8f9fa';
+        }
+    });
+    
+    // Auto-submit on change (preserves sorting)
+    programSelect.addEventListener('change', function() {
+        filterForm.submit();
+    });
+    
+    // Enhance sort links with loading indicator
+    const sortLinks = document.querySelectorAll('.sort-link');
+    sortLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            const icon = this.querySelector('.sort-arrow');
+            if (icon) {
+                icon.className = 'fas fa-spinner fa-spin sort-arrow';
+            }
         });
     });
 });
