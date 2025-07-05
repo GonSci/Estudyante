@@ -76,6 +76,30 @@ if ($table_check->num_rows > 0) {
 }
 ?>
 
+    <!-- Welcome Section -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header" style="background-color: hsl(217, 65.90%, 25.30%); color: white;">
+            <h3 class="mb-0"><i class="fas fa-home me-2"></i>Admin Dashboard</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h4>Welcome to the Admin Panel</h4>
+                    <p class="lead">Manage your student registration system efficiently with our comprehensive admin tools.</p>
+                    <hr class="my-4">
+                    <p>Use the sidebar navigation to access different sections of the system. You can manage students, courses, announcements, and view your task calendar.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <i class="fas fa-graduation-cap fa-4x text-primary mb-3"></i>
+                        <h5>System Status</h5>
+                        <span class="badge bg-success fs-6">Online</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <div class="container mt-4">
     <!-- Announcements Section -->
     <div class="card mb-4 shadow-sm">
@@ -166,39 +190,54 @@ if ($table_check->num_rows > 0) {
         </div>
     </div>
     
-    <!-- Original Dashboard Content -->
-    <div class="jumbotron">
-        <h2>Navigations</h2>
-        <p class="lead">Use the sidebar to manage students, courses, and view registrations.</p>
-        <hr class="my-4">
-    </div>
     
-    <!-- Quick access cards -->
-    <div class="row mt-4">
-        <div class="col-md-4 mb-4">
-            <div class="card">
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100 text-center">
                 <div class="card-body">
-                    <h5 class="card-title">Manage Courses</h5>
-                    <p class="card-text">Add, edit, or delete courses in the system.</p>
-                    <a href="manage-courses.php" class="btn btn-primary">Go to Courses</a>
+                    <i class="fas fa-calendar-alt fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Task Calendar</h5>
+                    <p class="card-text">Manage your tasks and schedule</p>
+                    <a href="calendar.php" class="btn btn-primary">
+                        <i class="fas fa-arrow-right me-1"></i>Go to Calendar
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-4">
-            <div class="card">
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100 text-center">
                 <div class="card-body">
-                    <h5 class="card-title">Manage Students</h5>
-                    <p class="card-text">View and manage student accounts.</p>
-                    <a href="manage-students.php" class="btn btn-primary">Go to Students</a>
+                    <i class="fas fa-user-graduate fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Students</h5>
+                    <p class="card-text">Manage student accounts and records</p>
+                    <a href="manage-students.php" class="btn btn-success">
+                        <i class="fas fa-arrow-right me-1"></i>Manage Students
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-4">
-            <div class="card">
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100 text-center">
                 <div class="card-body">
-                    <h5 class="card-title">View Curriculum</h5>
-                    <p class="card-text">View the complete program curriculum.</p>
-                    <a href="view-curriculum.php" class="btn btn-primary">View Curriculum</a>
+                    <i class="fas fa-book fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Courses</h5>
+                    <p class="card-text">Add, edit, and manage courses</p>
+                    <a href="manage-courses.php" class="btn btn-warning">
+                        <i class="fas fa-arrow-right me-1"></i>Manage Courses
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-clipboard-list fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">Curriculum</h5>
+                    <p class="card-text">View program curriculum</p>
+                    <a href="view-curriculum.php" class="btn btn-info">
+                        <i class="fas fa-arrow-right me-1"></i>View Curriculum
+                    </a>
                 </div>
             </div>
         </div>

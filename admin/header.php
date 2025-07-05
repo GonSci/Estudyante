@@ -219,6 +219,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin'){
         </div>
         <ul class="nav flex-column">
             <li class="nav-item"><a href="dashboard.php" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+            <li class="nav-item"><a href="calendar.php" class="nav-link"><i class="fas fa-calendar-alt"></i>Task Calendar</a></li>
             <li class="nav-item"><a href="manage-students.php" class="nav-link"><i class="fas fa-user-graduate"></i>Manage Students</a></li>
             <li class="nav-item"><a href="manage-courses.php" class="nav-link"><i class="fas fa-book"></i>Manage Courses</a></li>
             <li class="nav-item"><a href="view-curriculum.php" class="nav-link"><i class="fas fa-clipboard-list"></i>View Curriculum</a></li>
