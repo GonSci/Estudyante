@@ -2,26 +2,21 @@
 
 session_start();
 
-// Check authentication first
 if($_SESSION['role'] !== 'admin'){
     header("Location: ../login.php");
     exit;
 }
 
-// Include database connection first (no output)
 include '../includes/db.php';
 
-// Process announcement form submission
 if(isset($_POST['announcement_submit'])) {
     $title = mysqli_real_escape_string($conn, $_POST['announcement_title']);
     $message = mysqli_real_escape_string($conn, $_POST['announcement_message']);
     $is_active = isset($_POST['is_active']) ? 1 : 0;
     $expiry_date = mysqli_real_escape_string($conn, $_POST['expiry_date']);
     
-    // Check if $_SESSION['id'] exists, use 1 as default admin ID if not
     $admin_id = isset($_SESSION['id']) ? $_SESSION['id'] : 1;
     
-    // Insert announcement into database
     $query = "INSERT INTO announcements (title, message, created_by, is_active, expiry_date) 
               VALUES ('$title', '$message', $admin_id, $is_active, '$expiry_date')";
     
@@ -33,7 +28,6 @@ if(isset($_POST['announcement_submit'])) {
     }
 }
 
-// Handle announcement actions (delete, activate, deactivate)
 if(isset($_GET['action']) && isset($_GET['id'])) {
     $id = (int)$_GET['id'];
     
@@ -54,14 +48,11 @@ if(isset($_GET['action']) && isset($_GET['id'])) {
     }
 }
 
-// NOW include the header (after all redirects)
 include 'header.php';
 
-// Get all announcements
 $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at DESC");
 ?>
 
-<!-- Custom CSS for announcement management -->
 <link rel="stylesheet" href="css/manage-announcement.css">
 
 <div class="container-fluid mt-4">
@@ -294,7 +285,6 @@ $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at D
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// Function to activate announcement
 function activateAnnouncement(id) {
     Swal.fire({
         title: 'Activate Announcement?',
@@ -312,7 +302,6 @@ function activateAnnouncement(id) {
         buttonsStyling: false
     }).then((result) => {
         if (result.isConfirmed) {
-            // Show loading
             Swal.fire({
                 title: 'Activating...',
                 text: 'Please wait while we activate the announcement.',
@@ -324,7 +313,6 @@ function activateAnnouncement(id) {
                 }
             });
             
-            // Redirect to activate
             window.location.href = '?action=activate&id=' + id;
         }
     });
@@ -403,7 +391,7 @@ function deleteAnnouncement(id) {
     });
 }
 
-// Show success messages with SweetAlert2
+// Show success message
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const msg = urlParams.get('msg');
@@ -442,7 +430,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 showConfirmButton: true,
                 confirmButtonText: 'Great!'
             }).then(() => {
-                // Clean URL after showing success message
                 window.history.replaceState({}, document.title, window.location.pathname);
             });
         }

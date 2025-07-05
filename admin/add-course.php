@@ -2,10 +2,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Include database connection, but NOT the header yet
 include '../includes/db.php';
 
-// Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title         = trim($_POST['title']);
     $description   = trim($_POST['description']);
@@ -23,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->execute()) {
             $course_id = $stmt->insert_id;
 
-            // Insert prerequisites into course_prerequisites table
             foreach ($prerequisites as $prereq_id) {
                 $prereq_id = intval($prereq_id);
                 if ($prereq_id > 0) {
@@ -33,7 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            // Assign course to selected programs
             $assigned_programs = isset($_POST['programs']) ? $_POST['programs'] : [];
             foreach ($assigned_programs as $program_code) {
                 $program_code = trim($program_code);
@@ -54,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Only include the header AFTER all possible redirects
 include 'header.php';
 ?>
 
@@ -65,7 +60,6 @@ include 'header.php';
 </style>
 
 <?php
-// Fetch all existing courses for prerequisites dropdown
 $all_courses = $conn->query("SELECT id, title FROM courses");
 $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER BY program_code")
 ?>
@@ -76,7 +70,7 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
     </div>
     <div class="card-body">
         <form method="POST" action="">
-            <!-- Basic Information -->
+            <!-- Information -->
             <div class="row mb-3">
                 <div class="col-md-8">
                     <div class="mb-3">
@@ -171,7 +165,6 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
             <!-- Form Actions -->
             <div class="d-flex justify-content-end">
                 <a href="manage-courses.php" class="btn btn-secondary me-2"><i class="fas fa-times me-1"></i> Cancel</a>
-                <!-- Change the add button color: -->
                 <button type="button" class="btn" id="addCourseBtn" style="background-color: hsl(217, 65.90%, 25.30%); color: white;"><i class="fas fa-save me-1"></i> Add Course</button>
             </div>
         </form>
@@ -179,7 +172,6 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
 </div>
 
 <?php
-// Display prerequisites for the current course (if editing)
 if (isset($course_id)) {
     $stmt = $conn->prepare("SELECT c.title FROM course_prerequisites cp JOIN courses c ON cp.prerequisite_id = c.id WHERE cp.course_id = ?");
     $stmt->bind_param("i", $course_id);
@@ -199,16 +191,13 @@ if (isset($course_id)) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Add event listener to the button
     document.getElementById('addCourseBtn').addEventListener('click', function() {
-        // First validate the form
         const form = document.querySelector('form');
         if (!form.checkValidity()) {
             form.reportValidity();
             return;
         }
         
-        // Show success message first
         Swal.fire({
             title: "Course Added!",
             text: "The course has been successfully added.",
@@ -216,7 +205,6 @@ document.addEventListener('DOMContentLoaded', function() {
             timer: 1500,
             showConfirmButton: false
         }).then(() => {
-            // Submit the form after the alert closes
             form.submit();
         });
     });

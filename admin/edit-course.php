@@ -2,10 +2,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Include database connection, but NOT the header yet
 include '../includes/db.php';
 
-// Get course ID from URL
 $course_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if ($course_id <= 0) {
@@ -13,7 +11,6 @@ if ($course_id <= 0) {
     exit;
 }
 
-// Fetch course data
 $stmt = $conn->prepare("SELECT * FROM courses WHERE id = ?");
 $stmt->bind_param("i", $course_id);
 $stmt->execute();
@@ -27,7 +24,6 @@ if ($result->num_rows === 0) {
 $course = $result->fetch_assoc();
 $stmt->close();
 
-// Fetch current prerequisites
 $prereq_stmt = $conn->prepare("SELECT prerequisite_id FROM course_prerequisites WHERE course_id = ?");
 $prereq_stmt->bind_param("i", $course_id);
 $prereq_stmt->execute();
@@ -38,7 +34,6 @@ while ($row = $prereq_result->fetch_assoc()) {
 }
 $prereq_stmt->close();
 
-// Fetch current program assignments
 $program_stmt = $conn->prepare("SELECT program_code, year_level, academic_term FROM program_course WHERE course_id = ?");
 $program_stmt->bind_param("i", $course_id);
 $program_stmt->execute();
@@ -48,7 +43,6 @@ $current_year_level = '';
 $current_academic_term = '';
 while ($row = $program_result->fetch_assoc()) {
     $current_programs[] = $row['program_code'];
-    // Use the first assignment's year/term as default (you might want to improve this)
     if (empty($current_year_level)) {
         $current_year_level = $row['year_level'];
         $current_academic_term = $row['academic_term'];
@@ -56,7 +50,6 @@ while ($row = $program_result->fetch_assoc()) {
 }
 $program_stmt->close();
 
-// Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title         = trim($_POST['title']);
     $description   = trim($_POST['description']);
@@ -72,12 +65,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare("UPDATE courses SET title = ?, description = ?, credits = ?, max_capacity = ? WHERE id = ?");
         $stmt->bind_param("ssiii", $title, $description, $credits, $max_capacity, $course_id);
         if ($stmt->execute()) {
-            // Delete old prerequisites
             $delete_prereq = $conn->prepare("DELETE FROM course_prerequisites WHERE course_id = ?");
             $delete_prereq->bind_param("i", $course_id);
             $delete_prereq->execute();
             
-            // Insert new prerequisites
             foreach ($prerequisites as $prereq_id) {
                 $prereq_id = intval($prereq_id);
                 if ($prereq_id > 0) {
@@ -87,12 +78,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
-            // Delete old program assignments
             $delete_programs = $conn->prepare("DELETE FROM program_course WHERE course_id = ?");
             $delete_programs->bind_param("i", $course_id);
             $delete_programs->execute();
             
-            // Assign course to selected programs
             $assigned_programs = isset($_POST['programs']) ? $_POST['programs'] : [];
             foreach ($assigned_programs as $program_code) {
                 $program_code = trim($program_code);
@@ -113,10 +102,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Only include the header AFTER all possible redirects
 include 'header.php';
 
-// Fetch all existing courses for prerequisites dropdown
 $all_courses = $conn->query("SELECT id, title FROM courses WHERE id != $course_id");
 $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER BY program_code");
 ?>
@@ -134,7 +121,6 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
         <?php endif; ?>
 
         <form method="POST" action="">
-            <!-- Basic Information -->
             <div class="row mb-3">
                 <div class="col-md-8">
                     <div class="mb-3">
@@ -185,7 +171,6 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
                         <label class="form-label fw-bold"><i class="fas fa-graduation-cap me-1 text-primary-custom"></i> Assign to Program(s):</label>
                         <select name="programs[]" class="form-select" multiple style="height: 150px;">
                             <?php 
-                            // Reset the result pointer for programs
                             $programs->data_seek(0);
                             while ($row = $programs->fetch_assoc()): 
                             ?>
@@ -256,7 +241,6 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
 </div>
 
 <?php
-// Display current prerequisites for the course
 $stmt = $conn->prepare("SELECT c.title FROM course_prerequisites cp JOIN courses c ON cp.prerequisite_id = c.id WHERE cp.course_id = ?");
 $stmt->bind_param("i", $course_id);
 $stmt->execute();
@@ -280,20 +264,17 @@ if ($result->num_rows > 0) {
 
 <?php include 'footer.php'; ?>
 
-<!-- Add SweetAlert library -->
+<!-- SweetAlert library -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Add event listener to the button
     document.getElementById('updateCourseBtn').addEventListener('click', function() {
-        // First validate the form
         const form = document.querySelector('form');
         if (!form.checkValidity()) {
             form.reportValidity();
             return;
         }
         
-        // Show confirmation dialog
         Swal.fire({
             title: "Update Course?",
             text: "Are you sure you want to save these changes?",
@@ -304,7 +285,6 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmButtonText: "Yes, update it!"
         }).then((result) => {
             if (result.isConfirmed) {
-                // Show success message first
                 Swal.fire({
                     title: "Course Updated!",
                     text: "The course has been successfully updated.",
@@ -312,7 +292,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     timer: 1500,
                     showConfirmButton: false
                 }).then(() => {
-                    // Submit the form after the alert closes
                     form.submit();
                 });
             }

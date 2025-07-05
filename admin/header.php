@@ -88,20 +88,16 @@ document.addEventListener('DOMContentLoaded', function() {
         icon.classList.add('fa-bars');
     }
 
-    // Toggle sidebar when hamburger is clicked
     hamburgerBtn.addEventListener('click', toggleSidebar);
 
-    // Close sidebar when overlay is clicked
     overlay.addEventListener('click', closeSidebar);
 
-    // Close sidebar when window is resized to desktop
     window.addEventListener('resize', function() {
         if (window.innerWidth > 768) {
             closeSidebar();
         }
     });
 
-    // Close sidebar when any nav link is clicked (on mobile)
     const navLinks = sidebar.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
         link.addEventListener('click', function() {

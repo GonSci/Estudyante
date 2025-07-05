@@ -4,7 +4,6 @@
 <link rel="stylesheet" href="css/manage-students.css">
 
 <?php
-// Keep the existing PHP logic for search, pagination, etc.
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $records_per_page = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -46,7 +45,7 @@ $result_count = $result->num_rows;
 ?>
 
 <div class="container-fluid">
-    <!-- Simple Page Header -->
+    <!-- Page Header -->
     <div class="page-header">
         <div class="container">
             <div class="row align-items-center">
@@ -63,7 +62,7 @@ $result_count = $result->num_rows;
     </div>
 
     <div class="container">
-        <!-- Simple Info Bar -->
+        <!-- Info Bar -->
         <div class="text-muted mb-3 small">
             <?php if (!empty($search)): ?>
                 <i class="fas fa-search me-1"></i>
@@ -77,7 +76,7 @@ $result_count = $result->num_rows;
             <?php endif; ?>
         </div>
 
-        <!-- Simple Search -->
+        <!-- Search -->
         <div class="search-section">
             <form method="GET" action="" class="row align-items-center">
                 <div class="col-md-8">
@@ -165,7 +164,7 @@ $result_count = $result->num_rows;
                 </div>
             </div>
             
-            <!-- Simple Pagination -->
+            <!-- Pagination -->
             <?php if ($total_pages > 1): ?>
             <div class="pagination-container">
                 <nav>
@@ -255,7 +254,7 @@ $result_count = $result->num_rows;
     </div>
 </div>
 
-<!-- Enhanced JavaScript -->
+<!-- JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function deleteStudent(id, name) {
@@ -302,12 +301,10 @@ function deleteStudent(id, name) {
     });
 }
 
-// Enhanced search functionality
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.querySelector('input[name="search"]');
     const searchForm = searchInput.closest('form');
     
-    // Add real-time search indicator
     searchInput.addEventListener('input', function() {
         if (this.value.length > 0) {
             this.style.borderColor = '#4e73df';
@@ -318,7 +315,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Focus search input on Ctrl+F
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
             e.preventDefault();

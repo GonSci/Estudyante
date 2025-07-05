@@ -2,16 +2,12 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Include database connection, but NOT the header yet
 include '../includes/db.php';
 
-// Get the program code from URL parameter or form
 $program_code = isset($_GET['program']) ? $_GET['program'] : '';
 
-// If no program is selected yet, show a form to select a program
 if (empty($program_code)) {
     include 'header.php';
-    // Fetch all available programs
     $programs_query = $conn->query("SELECT program_code, program_name FROM programs ORDER BY program_code");
 ?>
     <div class="card shadow-sm mb-4">
@@ -40,7 +36,6 @@ if (empty($program_code)) {
 <?php
 } else {
     include 'header.php';
-    // Fetch all courses for the selected program, grouped by year and term
     $query = "SELECT c.title, c.credits, pc.year_level, pc.academic_term, 
                      GROUP_CONCAT(pr.title SEPARATOR ', ') as prerequisites
               FROM program_course pc
@@ -69,7 +64,6 @@ if (empty($program_code)) {
     $stmt->execute();
     $result = $stmt->get_result();
     
-    // Get program name
     $program_query = $conn->prepare("SELECT program_name FROM programs WHERE program_code = ?");
     $program_query->bind_param("s", $program_code);
     $program_query->execute();
@@ -109,7 +103,6 @@ if (empty($program_code)) {
                             $year_row_counts = [];
                             $term_row_counts = [];
                             
-                            // First pass to count rows for each year and term
                             $result_copy = $result;
                             while ($row = $result_copy->fetch_assoc()) {
                                 if (!isset($year_row_counts[$row['year_level']])) {
@@ -124,17 +117,14 @@ if (empty($program_code)) {
                                 $term_row_counts[$term_key]++;
                             }
                             
-                            // Reset result pointer
                             $stmt->execute();
                             $result = $stmt->get_result();
                             
-                            // Second pass to display the data
                             while ($row = $result->fetch_assoc()): 
                                 $year_changed = ($current_year != $row['year_level']);
                                 $term_changed = ($current_term != $row['academic_term'] || $year_changed);
                                 $term_key = $row['year_level'] . '_' . $row['academic_term'];
                                 
-                                // Track if this is the first row of a new term
                                 $is_new_term = $term_changed && !$year_changed;
                             ?>
                                 <tr <?= $is_new_term ? 'class="term-transition"' : '' ?>>

@@ -1,30 +1,24 @@
 <?php include 'header.php'; ?>
 <?php include '../includes/db.php'; ?>
 
-<!-- Link to shared admin CSS file -->
 <link rel="stylesheet" href="css/admin-common.css">
 
 <?php
-// Get filter and sort parameters
 $program_filter = isset($_GET['program']) ? trim($_GET['program']) : '';
 $sort_by = isset($_GET['sort']) ? $_GET['sort'] : 'title';
 $sort_order = isset($_GET['order']) && $_GET['order'] === 'desc' ? 'desc' : 'asc';
 
-// Validate sort field
 $allowed_sorts = ['title', 'credits', 'year_level', 'academic_term', 'max_capacity'];
 if (!in_array($sort_by, $allowed_sorts)) {
     $sort_by = 'title';
 }
 
-// Pagination settings
 $records_per_page = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $records_per_page;
 
-// Base query for counting total records
 $count_query = "SELECT COUNT(DISTINCT c.id) as total FROM courses c";
 
-// Add join and where clause if filtering by program
 if (!empty($program_filter)) {
     $count_query .= " JOIN program_course pc ON c.id = pc.course_id 
                 WHERE pc.program_code = '" . $conn->real_escape_string($program_filter) . "'";
@@ -34,17 +28,13 @@ $count_result = $conn->query($count_query);
 $total_records = $count_result->fetch_assoc()['total'];
 $total_pages = ceil($total_records / $records_per_page);
 
-// Base query for fetching courses with pagination and sorting
 if ($sort_by === 'year_level' || $sort_by === 'academic_term') {
-    // For year_level and academic_term, we need to join with program_course
     $query = "SELECT DISTINCT c.*, pc.year_level, pc.academic_term FROM courses c 
               LEFT JOIN program_course pc ON c.id = pc.course_id";
 } else {
-    // For other fields, use the main courses table
     $query = "SELECT DISTINCT c.* FROM courses c";
 }
 
-// Add join and where clause if filtering by program
 if (!empty($program_filter)) {
     if ($sort_by === 'year_level' || $sort_by === 'academic_term') {
         $query .= " WHERE pc.program_code = '" . $conn->real_escape_string($program_filter) . "'";
@@ -54,7 +44,6 @@ if (!empty($program_filter)) {
     }
 }
 
-// Add ORDER BY clause
 if ($sort_by === 'year_level' || $sort_by === 'academic_term') {
     $query .= " ORDER BY pc.$sort_by $sort_order, c.title ASC";
 } else {
@@ -128,8 +117,7 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
 
 <div class="container-fluid">
     <!-- Modern Page Header -->
-    <div class="page-header">
-        <div class="container">
+    <div class="page-header">                    <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <h2><i class="fas fa-book me-2"></i>Course Management</h2>
@@ -144,7 +132,6 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
     </div>
 
     <div class="container">
-        <!-- Simple Info Bar -->
         <div class="text-muted mb-3 small">
             <?php if (!empty($program_filter)): ?>
                 <i class="fas fa-filter me-1"></i>
@@ -175,7 +162,6 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
             <?php endif; ?>
         </div>
 
-        <!-- Sorting Controls -->
         <div class="sort-controls">
             <div class="d-flex align-items-center flex-wrap gap-2">
                 <span class="fw-bold text-muted">
@@ -220,7 +206,6 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
             </div>
         </div>
 
-        <!-- Program Filter -->
         <div class="search-section">
             <form method="GET" action="" class="row align-items-center">
                 <input type="hidden" name="sort" value="<?= htmlspecialchars($sort_by) ?>">
@@ -256,7 +241,6 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
         </div>
 
         <?php if ($result_count > 0): ?>
-            <!-- Courses Table -->
             <div class="courses-table-container">
                 <div class="table-header">
                     <h5><i class="fas fa-table me-2"></i>Course Records (<?= $result_count ?>)</h5>
@@ -360,7 +344,6 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
                 </div>
             </div>
             
-            <!-- Modern Pagination -->
             <?php if ($total_pages > 1): ?>
             <div class="pagination-container">
                 <nav>
@@ -424,7 +407,6 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
             <?php endif; ?>
 
         <?php else: ?>
-            <!-- Empty State -->
             <div class="empty-state">
                 <i class="fas fa-book"></i>
                 <h5>No Courses Found</h5>
@@ -450,7 +432,6 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
     </div>
 </div>
 
-<!-- Enhanced JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function deleteCourse(id, title) {
@@ -491,18 +472,15 @@ function deleteCourse(id, title) {
                 }
             });
             
-            // Redirect to delete
             window.location.href = `delete-course.php?id=${id}`;
         }
     });
 }
 
-// Enhanced filter functionality
 document.addEventListener('DOMContentLoaded', function() {
     const programSelect = document.querySelector('select[name="program"]');
     const filterForm = programSelect.closest('form');
     
-    // Add visual feedback
     programSelect.addEventListener('change', function() {
         if (this.value) {
             this.style.borderColor = '#4e73df';
@@ -513,12 +491,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Auto-submit on change (preserves sorting)
     programSelect.addEventListener('change', function() {
         filterForm.submit();
     });
     
-    // Enhance sort links with loading indicator
     const sortLinks = document.querySelectorAll('.sort-link');
     sortLinks.forEach(link => {
         link.addEventListener('click', function() {

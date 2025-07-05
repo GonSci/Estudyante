@@ -1,0 +1,36 @@
+
+.card-body {
+    padding: 1.25rem;
+}
+
+
+.icon-wrapper {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.card:hover .icon-wrapper {
+    transform: translateY(-5px);
+}
+
+.btn-light {
+    opacity: 0.8;
+}
+
+.btn-light:hover {
+    opacity: 1;
+}
+
+
+.small {
+    font-size: 0.875rem;
+}
+
+
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}

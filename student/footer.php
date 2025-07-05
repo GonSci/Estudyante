@@ -2,7 +2,6 @@
 // footer.php - Student Portal Footer
 ?>
 
-<!-- Footer -->
 <footer class="mt-5 py-4" style="background-color: hsl(217, 65.90%, 25.30%); color: white;">
     <div class="container">
         <div class="row">
@@ -58,17 +57,17 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Font Awesome JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<!-- Navbar JS -->
+<script src="css/navbar.js"></script>
 
 <!-- Custom Scripts -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     })
     
-    // Back to top button functionality
     var backToTopBtn = document.getElementById('backToTopBtn');
     if (backToTopBtn) {
         window.onscroll = function() {
@@ -81,7 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Smooth scroll to top function
 function scrollToTop() {
     window.scrollTo({
         top: 0,
@@ -90,7 +88,7 @@ function scrollToTop() {
 }
 </script>
 
-<!-- Back to Top Button -->
+
 <button onclick="scrollToTop()" id="backToTopBtn" title="Go to top" 
         style="display: none; position: fixed; bottom: 20px; right: 30px; z-index: 99; border: none; outline: none; 
                background-color: hsl(217, 65.90%, 25.30%); color: white; cursor: pointer; padding: 10px 15px; 

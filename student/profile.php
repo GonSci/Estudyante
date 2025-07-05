@@ -1,5 +1,7 @@
 <?php include 'navbar.php'; ?>
 
+<link rel="stylesheet" href="css/profile.css">
+
 <div class="container mt-0">
     <div class="row">
         <div class="col-lg-12">
@@ -204,37 +206,7 @@
     </div>
 </div>
 
-<style>
-/* Custom styling for profile page */
-.profile-table {
-    margin-bottom: 0;
-}
-
-.profile-table th {
-    background-color: rgba(59, 130, 246, 0.1);
-    font-weight: 600;
-    color: #374151;
-    border-bottom-width: 0;
-}
-
-.profile-table td {
-    color: #4b5563;
-}
-
-.profile-table tr:hover {
-    background-color: rgba(59, 130, 246, 0.05);
-}
-
-.profile-pic-wrapper {
-    transition: transform 0.3s ease;
-}
-
-.profile-pic-wrapper:hover {
-    transform: scale(1.05);
-}
-</style>
-
-<!-- SweetAlert2 for better alerts -->
+<!-- SweetAlert2  -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -248,7 +220,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const newPassword = document.getElementById('newPassword').value.trim();
         const confirmPassword = document.getElementById('confirmPassword').value.trim();
         
-        // Client-side validation
         if (!currentPassword || !newPassword || !confirmPassword) {
             Swal.fire({
                 icon: 'warning',
@@ -289,11 +260,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Show loading state
         changePasswordBtn.disabled = true;
         changePasswordBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Changing...';
         
-        // Send request to backend
         fetch('change-password.php', {
             method: 'POST',
             headers: {
@@ -306,14 +275,13 @@ document.addEventListener('DOMContentLoaded', function() {
             })
         })
         .then(response => {
-            // Check if response is ok
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return response.text(); // Get as text first to debug
+            return response.text(); 
         })
         .then(textData => {
-            console.log('Raw response:', textData); // Debug log
+            console.log('Raw response:', textData);
             try {
                 const data = JSON.parse(textData);
                 if (data.success) {
@@ -325,7 +293,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         timer: 3000,
                         timerProgressBar: true
                     }).then(() => {
-                        // Reset form and close modal
                         changePasswordForm.reset();
                         changePasswordModal.hide();
                     });
@@ -357,29 +324,24 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         })
         .finally(() => {
-            // Reset button state
             changePasswordBtn.disabled = false;
             changePasswordBtn.innerHTML = 'Change Password';
         });
     });
     
-    // Reset form when modal is closed
     document.getElementById('changePasswordModal').addEventListener('hidden.bs.modal', function () {
         changePasswordForm.reset();
         changePasswordBtn.disabled = false;
         changePasswordBtn.innerHTML = 'Change Password';
     });
     
-    // Add password strength indicator
     const newPasswordInput = document.getElementById('newPassword');
     newPasswordInput.addEventListener('input', function() {
         const password = this.value;
         const strength = getPasswordStrength(password);
         
-        // Remove existing strength classes
         this.classList.remove('border-danger', 'border-warning', 'border-success');
         
-        // Add appropriate class based on strength
         if (password.length === 0) {
             return;
         } else if (strength === 'weak') {

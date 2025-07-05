@@ -2,10 +2,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Include database connection, but NOT the header yet
 include '../includes/db.php';
 
-// Get course ID from URL
 $course_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if ($course_id <= 0) {
@@ -13,7 +11,6 @@ if ($course_id <= 0) {
     exit;
 }
 
-// Fetch course name for confirmation message
 $stmt = $conn->prepare("SELECT title FROM courses WHERE id = ?");
 $stmt->bind_param("i", $course_id);
 $stmt->execute();
@@ -28,21 +25,17 @@ $course = $result->fetch_assoc();
 $course_title = $course['title'];
 $stmt->close();
 
-// Process actual deletion if confirmed
 if (isset($_POST['confirm_delete']) && $_POST['confirm_delete'] === 'yes') {
-    // First delete from program_course (foreign key references)
     $delete_program = $conn->prepare("DELETE FROM program_course WHERE course_id = ?");
     $delete_program->bind_param("i", $course_id);
     $delete_program->execute();
     $delete_program->close();
 
-    // Then delete from course_prerequisites (foreign key references)
     $delete_prereq = $conn->prepare("DELETE FROM course_prerequisites WHERE course_id = ? OR prerequisite_id = ?");
     $delete_prereq->bind_param("ii", $course_id, $course_id);
     $delete_prereq->execute();
     $delete_prereq->close();
 
-    // Finally delete the course itself
     $delete_course = $conn->prepare("DELETE FROM courses WHERE id = ?");
     $delete_course->bind_param("i", $course_id);
     $result = $delete_course->execute();
@@ -52,7 +45,6 @@ if (isset($_POST['confirm_delete']) && $_POST['confirm_delete'] === 'yes') {
     exit;
 }
 
-// Only include the header AFTER all possible redirects
 include 'header.php';
 ?>
 
@@ -78,7 +70,6 @@ document.addEventListener('DOMContentLoaded', function() {
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.isConfirmed) {
-            // Create and submit a form to perform the deletion
             var form = document.createElement('form');
             form.method = 'POST';
             form.action = '';
@@ -92,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.appendChild(form);
             form.submit();
         } else {
-            // Redirect back to manage courses
             window.location.href = 'manage-courses.php';
         }
     });

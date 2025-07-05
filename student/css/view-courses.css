@@ -1,0 +1,47 @@
+
+.year-header {
+    background-color: hsl(217, 65.90%, 25.30%, 0.15) !important;
+    color: hsl(217, 65.90%, 25.30%);
+    font-weight: bold;
+    font-size: 1.1em;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.term-header {
+    background-color: hsl(217, 65.90%, 25.30%, 0.08) !important;
+    color: hsl(217, 65.90%, 25.30%);
+    font-weight: bold;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.year-header, .term-header {
+    border-right: 2px solid hsl(217, 65.90%, 25.30%, 0.2);
+}
+
+.table tbody tr:first-child td {
+    border-top: 2px solid hsl(217, 65.90%, 25.30%, 0.3);
+}
+
+.table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.term-transition td {
+    border-top: 1px dashed hsl(217, 65.90%, 25.30%, 0.3) !important;
+}
+
+@media print {
+    .year-header {
+        background-color: #e0e8f5 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .term-header {
+        background-color: #edf2f9 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}

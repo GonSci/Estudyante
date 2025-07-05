@@ -13,6 +13,12 @@ if(!isset($_SESSION['role']) || $_SESSION['role'] !== 'student'){
 
 // Now include the navbar (after session and auth check)
 include 'navbar.php';
+?>
+
+<!-- View Courses specific CSS -->
+<link rel="stylesheet" href="css/view-courses.css">
+
+<?php
 
 // Get student information including program
 $username = $_SESSION['username'];
@@ -221,61 +227,6 @@ try {
         </div>
     </div>
 </div>
-
-<style>
-    /* Year and Term Styling */
-    .year-header {
-        background-color: hsl(217, 65.90%, 25.30%, 0.15) !important;
-        color: hsl(217, 65.90%, 25.30%);
-        font-weight: bold;
-        font-size: 1.1em;
-        text-align: center;
-        vertical-align: middle;
-    }
-    
-    .term-header {
-        background-color: hsl(217, 65.90%, 25.30%, 0.08) !important;
-        color: hsl(217, 65.90%, 25.30%);
-        font-weight: bold;
-        vertical-align: middle;
-        text-align: center;
-    }
-    
-    /* Add subtle border to separate sections */
-    .year-header, .term-header {
-        border-right: 2px solid hsl(217, 65.90%, 25.30%, 0.2);
-    }
-    
-    /* For printing */
-    @media print {
-        .year-header {
-            background-color: #e0e8f5 !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        
-        .term-header {
-            background-color: #edf2f9 !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-    }
-
-    /* Add this to your existing styles */
-    .table tbody tr:first-child td {
-        border-top: 2px solid hsl(217, 65.90%, 25.30%, 0.3);
-    }
-    
-    /* Add subtle alternating row colors within a term group */
-    .table tbody tr:nth-of-type(odd) {
-        background-color: rgba(0, 0, 0, 0.02);
-    }
-    
-    /* Add term transition indicator */
-    .term-transition td {
-        border-top: 1px dashed hsl(217, 65.90%, 25.30%, 0.3) !important;
-    }
-</style>
 
 <?php include 'footer.php'; ?>
 

@@ -1,16 +1,16 @@
 <?php
 session_start();
 
-// Check if user is admin
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../login.php");
     exit;
 }
 
-// Include database connection
+
 include '../includes/db.php';
 
-// Get and validate announcement ID
+
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     header("Location: manage-announcements.php");
     exit;
@@ -20,16 +20,14 @@ $announcement_id = (int)$_GET['id'];
 $error_message = '';
 $success_message = '';
 
-// Handle form submission
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['announcement_submit'])) {
     
-    // Get form data
     $title = trim($_POST['announcement_title']);
     $message = trim($_POST['announcement_message']);
     $is_active = isset($_POST['is_active']) ? 1 : 0;
     $expiry_date = $_POST['expiry_date'];
     
-    // Validate form data
     if (empty($title)) {
         $error_message = "Title is required.";
     } elseif (empty($message)) {
@@ -47,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['announcement_submit']
             if ($stmt->execute()) {
                 if ($stmt->affected_rows > 0) {
                     $stmt->close();
-                    // Redirect to manage page with success message
                     header("Location: manage-announcements.php?msg=updated");
                     exit;
                 } else {
@@ -63,7 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['announcement_submit']
     }
 }
 
-// Get announcement details
 $query = "SELECT * FROM announcements WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $announcement_id);
@@ -78,7 +74,6 @@ if ($result->num_rows > 0) {
 }
 $stmt->close();
 
-// Include header
 include 'header.php';
 ?>
 
@@ -190,7 +185,7 @@ include 'header.php';
     </div>
 </div>
 
-<!-- Simple JavaScript -->
+<!-- JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -211,11 +206,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Color coding for character count
         if (chars > 500) {
-            charCount.style.color = '#dc3545'; // Red
+            charCount.style.color = '#dc3545'; 
         } else if (chars > 300) {
-            charCount.style.color = '#ffc107'; // Yellow
+            charCount.style.color = '#ffc107'; 
         } else {
-            charCount.style.color = '#28a745'; // Green
+            charCount.style.color = '#28a745';
         }
     }
 
@@ -246,7 +241,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const message = document.getElementById('announcement_message').value.trim();
             const expiry = document.getElementById('expiry_date').value;
 
-            // Basic validation
             if (title.length < 3) {
                 alert('Title must be at least 3 characters long.');
                 document.getElementById('announcement_title').focus();
@@ -278,11 +272,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Show success message if redirected from update
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('msg') === 'updated') {
         alert('Announcement updated successfully!');
-        // Clean the URL
         window.history.replaceState({}, document.title, window.location.pathname + '?id=' + urlParams.get('id'));
     }
 });

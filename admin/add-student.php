@@ -1,13 +1,7 @@
 <?php
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 include '../includes/db.php';
 
-// Place all form processing and header("Location: ...") logic here
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Collect and sanitize inputs
     $first_name = trim($_POST['first_name']);
     $middle_name = trim($_POST['middle_name']);
     $last_name = trim($_POST['last_name']);
@@ -21,11 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-    // Validation check
     if (empty($first_name) || empty($last_name) || empty($email) || empty($program) || empty($username) || empty($_POST['password'])) {
         $error_message = '⚠️ Please fill in all required fields.';
     } else {
-        // Check if email already exists
         $check_email = $conn->prepare("SELECT id FROM students WHERE email = ?");
         $check_email->bind_param('s', $email);
         $check_email->execute();
@@ -36,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $check_email->close();
 
-            // Check if username already exists in users table
             $check_username = $conn->prepare("SELECT id FROM users WHERE username = ?");
             $check_username->bind_param('s', $username);
             $check_username->execute();
@@ -60,10 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $email, $program, $year_level, $academic_term, $username, $password
                 );
                     if ($stmt->execute()) {
-                        // Get the new student's ID
                         $new_student_id = $conn->insert_id;
 
-                        // Prepare user insert (use the same username and password, role = 'student')
                         $user_stmt = $conn->prepare("INSERT INTO users (username, password, role, student_id, created_at) VALUES (?, ?, 'student', ?, NOW())");
                         $user_stmt->bind_param('ssi', $username, $password, $new_student_id);
 
@@ -84,7 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Only after all PHP logic, include the header and output HTML
 include 'header.php';
 ?>
 

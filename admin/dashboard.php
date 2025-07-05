@@ -1,13 +1,10 @@
 <?php
-// Use output buffering to prevent "headers already sent" errors
 ob_start();
 
-// Check if session is already started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Debug session data (as HTML comment so it doesn't affect headers)
 echo "<!-- Debug: Session data = " . print_r($_SESSION, true) . " -->";
 
 if(!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin'){
@@ -18,24 +15,19 @@ if(!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin'){
 include 'header.php';
 include '../includes/db.php';
 
-// Dashboard Statistics Queries
 $stats = [];
 
-// Total Students
 $student_count = $conn->query("SELECT COUNT(*) as count FROM students");
 $stats['total_students'] = $student_count ? $student_count->fetch_assoc()['count'] : 0;
 
-// Active Announcements
 $active_announcements = $conn->query("SELECT COUNT(*) as count FROM announcements WHERE is_active = 1 AND (expiry_date >= CURDATE() OR expiry_date IS NULL)");
 $stats['active_announcements'] = $active_announcements ? $active_announcements->fetch_assoc()['count'] : 0;
 
-// Pending Tasks (if tasks table exists)
 $tasks_table_check = $conn->query("SHOW TABLES LIKE 'tasks'");
 if ($tasks_table_check && $tasks_table_check->num_rows > 0) {
     $pending_tasks = $conn->query("SELECT COUNT(*) as count FROM tasks WHERE status = 'pending'");
     $stats['pending_tasks'] = $pending_tasks ? $pending_tasks->fetch_assoc()['count'] : 0;
     
-    // Completed Tasks
     $completed_tasks = $conn->query("SELECT COUNT(*) as count FROM tasks WHERE status = 'completed'");
     $stats['completed_tasks'] = $completed_tasks ? $completed_tasks->fetch_assoc()['count'] : 0;
 } else {
@@ -78,7 +70,7 @@ while($monthly_registrations && $row = $monthly_registrations->fetch_assoc()) {
 <!-- Link to external CSS -->
 <link rel="stylesheet" href="css/dashboard.css">
 
-<!-- Enhanced Dashboard Layout -->
+<!-- Dashboard Layout -->
 <div class="container-fluid mt-4">
     <!-- Modern Dashboard Header -->
     <div class="dashboard-header">
@@ -90,7 +82,7 @@ while($monthly_registrations && $row = $monthly_registrations->fetch_assoc()) {
             </div>
         </div>
     </div>
-    <!-- Enhanced Statistics Cards Row -->
+    <!-- Statistics Cards Row -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card stat-card primary shadow h-100">
@@ -149,7 +141,7 @@ while($monthly_registrations && $row = $monthly_registrations->fetch_assoc()) {
         </div>
     </div>
 
-    <!-- Enhanced Charts Row -->
+    <!-- Charts Row -->
     <div class="row mb-4">
         <!-- Student Distribution by Year Level -->
         <div class="col-xl-6 col-lg-6">
@@ -180,7 +172,7 @@ while($monthly_registrations && $row = $monthly_registrations->fetch_assoc()) {
         </div>
     </div>
 
-    <!-- Enhanced Registration Trends -->
+    <!-- Registration Trends -->
     <div class="row mb-4">
         <div class="col-xl-8 col-lg-7">
             <div class="card modern-card shadow mb-4">
@@ -195,7 +187,7 @@ while($monthly_registrations && $row = $monthly_registrations->fetch_assoc()) {
             </div>
         </div>
 
-        <!-- Enhanced System Activity -->
+        <!-- System Activity -->
         <div class="col-xl-4 col-lg-5">
             <div class="card modern-card shadow mb-4">
                 <div class="modern-card-header">
@@ -219,7 +211,7 @@ while($monthly_registrations && $row = $monthly_registrations->fetch_assoc()) {
         </div>
     </div>
 
-    <!-- Enhanced Task Progress and Quick Actions -->
+    <!-- Task Progress and Quick Actions -->
     <?php if($stats['pending_tasks'] > 0 || $stats['completed_tasks'] > 0): ?>
     <div class="row mb-4">
         <div class="col-xl-6 col-lg-6">
@@ -235,7 +227,7 @@ while($monthly_registrations && $row = $monthly_registrations->fetch_assoc()) {
             </div>
         </div>
 
-        <!-- Enhanced Quick Actions -->
+        <!-- Quick Actions -->
         <div class="col-xl-6 col-lg-6">
             <div class="card modern-card shadow mb-4">
                 <div class="modern-card-header">
@@ -286,7 +278,7 @@ while($monthly_registrations && $row = $monthly_registrations->fetch_assoc()) {
         </div>
     </div>
     <?php else: ?>
-    <!-- Quick Actions Only (when no tasks) -->
+    <!-- Quick Actions -->
     <div class="row mb-4">
         <div class="col-xl-8 col-lg-8 mx-auto">
             <div class="card modern-card shadow mb-4">
@@ -337,9 +329,7 @@ while($monthly_registrations && $row = $monthly_registrations->fetch_assoc()) {
 
 <!-- Chart.js Scripts -->
 <script>
-// Modern, Simple, and Responsive Chart Implementation
 
-// Color palette - easily customizable
 const CHART_COLORS = {
     primary: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
     gradients: {
@@ -350,7 +340,6 @@ const CHART_COLORS = {
     }
 };
 
-// Common chart options for consistency
 const COMMON_OPTIONS = {
     responsive: true,
     maintainAspectRatio: false,
@@ -379,7 +368,6 @@ const COMMON_OPTIONS = {
     }
 };
 
-// 1. Year Level Distribution Chart (Doughnut)
 const yearLevelChart = new Chart(document.getElementById('yearLevelChart'), {
     type: 'doughnut',
     data: {
@@ -416,7 +404,6 @@ const yearLevelChart = new Chart(document.getElementById('yearLevelChart'), {
     }
 });
 
-// 2. Academic Terms Chart (Bar)
 const termChart = new Chart(document.getElementById('academicTermChart'), {
     type: 'bar',
     data: {
@@ -463,7 +450,6 @@ const termChart = new Chart(document.getElementById('academicTermChart'), {
     }
 });
 
-// 3. Monthly Registration Trends (Line with Area)
 const monthlyChart = new Chart(document.getElementById('monthlyRegistrationsChart'), {
     type: 'line',
     data: {
@@ -562,14 +548,12 @@ const taskChart = new Chart(document.getElementById('taskProgressChart'), {
 });
 <?php endif; ?>
 
-// Chart responsiveness enhancement
 function handleChartResize() {
     [yearLevelChart, termChart, monthlyChart<?php if($stats['pending_tasks'] > 0 || $stats['completed_tasks'] > 0): ?>, taskChart<?php endif; ?>].forEach(chart => {
         if (chart) chart.resize();
     });
 }
 
-// Handle window resize
 let resizeTimeout;
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
@@ -577,7 +561,6 @@ window.addEventListener('resize', () => {
 });
 </script>
 
-<!-- Keep existing footer -->
 <?php include 'footer.php'; ?>
 
 

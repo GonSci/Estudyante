@@ -1,0 +1,27 @@
+
+.profile-table {
+    margin-bottom: 0;
+}
+
+.profile-table th {
+    background-color: rgba(59, 130, 246, 0.1);
+    font-weight: 600;
+    color: #374151;
+    border-bottom-width: 0;
+}
+
+.profile-table td {
+    color: #4b5563;
+}
+
+.profile-table tr:hover {
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.profile-pic-wrapper {
+    transition: transform 0.3s ease;
+}
+
+.profile-pic-wrapper:hover {
+    transform: scale(1.05);
+}

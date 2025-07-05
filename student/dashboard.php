@@ -1,20 +1,19 @@
 <?php
-// Start session first
 session_start();
 
-// Include database connection
 include '../includes/db.php';
 
-// Check if student is logged in (optional security check)
 if(!isset($_SESSION['role']) || $_SESSION['role'] !== 'student'){
     header("Location: ../login.php");
     exit;
 }
 
-// Now include the navbar (after session and auth check)
 include 'navbar.php';
+?>
 
-// Get active announcements that haven't expired
+<link rel="stylesheet" href="css/dashboard.css">
+
+<?php
 $announcements = $conn->query("
     SELECT * FROM announcements
     WHERE is_active = 1 
@@ -23,11 +22,8 @@ $announcements = $conn->query("
 ");
 ?>
 
-<!-- Main Content Area -->
 <div class="container mt-4">
-    <!-- Top Row: Quick Stats & Announcements -->
     <div class="row mb-4">
-        <!-- Left Column: Student Quick Info -->
         <div class="col-md-4 mb-4 mb-md-0">
             <div class="card h-100 shadow-sm">
                 <div class="card-header" style="background-color: hsl(217, 65.90%, 25.30%); color: white;">
@@ -37,10 +33,8 @@ $announcements = $conn->query("
                     <div class="text-center mb-3">
                         <div style="width: 100px; height: 100px; background-color: hsl(217, 65.90%, 25.30%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; color: white; font-size: 40px;">
                             <?php 
-                            // Get student details from database instead of session
-                            $username = $_SESSION['username']; // We still need username from session for identification
+                            $username = $_SESSION['username']; 
 
-                            // Prepare and execute a query to get student info
                             $stmt = $conn->prepare("SELECT first_name, last_name FROM students WHERE username = ?");
                             $stmt->bind_param("s", $username);
                             $stmt->execute();
@@ -50,10 +44,8 @@ $announcements = $conn->query("
                                 $student_info = $result->fetch_assoc();
                                 $initials = strtoupper(substr($student_info['first_name'], 0, 1) . substr($student_info['last_name'], 0, 1));
                             } else if (isset($_SESSION['username'])) {
-                                // Fallback to username if database query fails
                                 $initials = strtoupper(substr($_SESSION['username'], 0, 2));
                             } else {
-                                // Default if nothing else works
                                 $initials = 'ST';
                             }
 
@@ -109,7 +101,6 @@ $announcements = $conn->query("
             </div>
         </div>
         
-        <!-- Right Column: Announcements -->
         <div class="col-md-8">
             <?php if($announcements && $announcements->num_rows > 0): ?>
                 <div class="card h-100 shadow-sm">
@@ -146,9 +137,7 @@ $announcements = $conn->query("
         </div>
     </div>
     
-    <!-- Middle Row: Quick Access Cards -->
     <div class="row mb-4">
-        <!-- Course Registration -->
         <div class="col-md-4 mb-4 mb-md-0">
             <div class="card h-100 shadow-sm">
                 <div class="card-body text-center">
@@ -162,7 +151,6 @@ $announcements = $conn->query("
             </div>
         </div>
         
-        <!-- View Courses -->
         <div class="col-md-4 mb-4 mb-md-0">
             <div class="card h-100 shadow-sm">
                 <div class="card-body text-center">
@@ -176,7 +164,6 @@ $announcements = $conn->query("
             </div>
         </div>
         
-        <!-- Upcoming Events -->
         <div class="col-md-4">
             <div class="card h-100 shadow-sm">
                 <div class="card-body text-center">
@@ -191,7 +178,6 @@ $announcements = $conn->query("
         </div>
     </div>
     
-    <!-- Bottom Row: School Information -->
     <div class="card mb-4 shadow-sm">
         <div class="card-header" style="background-color: hsl(217, 65.90%, 25.30%); color: white;">
             <div class="d-flex justify-content-between align-items-center">
@@ -204,7 +190,6 @@ $announcements = $conn->query("
         <div class="collapse show" id="schoolInfo">
             <div class="card-body">
                 <div class="row">
-                    <!-- School Logo and Motto -->
                     <div class="col-md-3 text-center mb-3 mb-md-0">
                         <img src="../assets/login_logo.webp" alt="School Logo" style="max-width: 150px; margin-bottom: 15px;" class="img-fluid">
                         <div class="mt-3">
@@ -214,7 +199,6 @@ $announcements = $conn->query("
                         </div>
                     </div>
                     
-                    <!-- Vision and Mission - More Compact -->
                     <div class="col-md-9">
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -239,7 +223,6 @@ $announcements = $conn->query("
         </div>
     </div>
     
-    <!-- Upcoming Events Calendar - Compact Version -->
     <div class="card shadow-sm mb-4">
         <div class="card-header" style="background-color: hsl(217, 65.90%, 25.30%); color: white;">
             <h5 class="mb-0"><i class="fas fa-calendar-week me-2"></i>Upcoming Events</h5>
@@ -271,46 +254,5 @@ $announcements = $conn->query("
         </div>
     </div>
 </div>
-
-<!-- Custom Styles -->
-<style>
-    /* Make cards more compact */
-    .card-body {
-        padding: 1.25rem;
-    }
-    
-    /* Add hover effect to action cards */
-    .icon-wrapper {
-        height: 70px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.3s ease;
-    }
-    
-    .card:hover .icon-wrapper {
-        transform: translateY(-5px);
-    }
-    
-    /* Collapsible section styling */
-    .btn-light {
-        opacity: 0.8;
-    }
-    
-    .btn-light:hover {
-        opacity: 1;
-    }
-    
-    /* Smaller text for school info */
-    .small {
-        font-size: 0.875rem;
-    }
-    
-    /* Custom badge styling */
-    .badge {
-        font-weight: 500;
-        padding: 0.5em 0.75em;
-    }
-</style>
 
 <?php include 'footer.php'; ?>

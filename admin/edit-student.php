@@ -11,7 +11,6 @@ if ($student_id <= 0) {
 
 $successMessage = "";
 
-// Fetch student data before processing POST (needed for comparison)
 $stmt = $conn->prepare("SELECT * FROM students WHERE id = ?");
 $stmt->bind_param("i", $student_id);
 $stmt->execute();
@@ -27,7 +26,6 @@ $student = $result->fetch_assoc();
 $current_username = $student['username'];
 $current_email = $student['email'];
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $first_name      = trim($_POST['first_name']);
     $middle_name     = trim($_POST['middle_name']);
@@ -40,14 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $year_level = $_POST['year_level'];
     $academic_term        = $_POST['academic_term'];
     $username        = trim($_POST['username']);
-    $password        = $_POST['password']; // Optional new password
+    $password        = $_POST['password']; 
 
     if (empty($first_name) || empty($middle_name) || empty($last_name) || empty($email) || empty($program) || empty($username)) {
         echo "<div class='alert alert-danger' role='alert'>
                 Please fill in all required fields.
               </div>";
     } else {
-        // Only check for duplicates if username or email has changed
         if ($username !== $current_username || $email !== $current_email) {
             $check = $conn->prepare("SELECT id FROM students WHERE (username = ? OR email = ?) AND id != ?");
             $check->bind_param("ssi", $username, $email, $student_id);
@@ -64,7 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $check->close();
         }
 
-        // Proceed to update
         if (!empty($password)) {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("UPDATE students SET 
@@ -87,14 +83,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($stmt->execute()) {
-            // Update the users table as well
             $user_update_sql = "UPDATE users SET username = ?, password = ? WHERE student_id = ?";
             $user_update_stmt = $conn->prepare($user_update_sql);
             if (!empty($password)) {
-                // If password was changed, use the new hashed password
                 $user_update_stmt->bind_param('ssi', $username, $hashedPassword, $student_id);
             } else {
-                // If password was not changed, fetch the current password from users table
                 $get_user = $conn->prepare("SELECT password FROM users WHERE student_id = ?");
                 $get_user->bind_param('i', $student_id);
                 $get_user->execute();
