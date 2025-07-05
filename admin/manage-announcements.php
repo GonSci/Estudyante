@@ -61,34 +61,8 @@ include 'header.php';
 $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at DESC");
 ?>
 
-<!-- Custom CSS for consistent styling -->
-<style>
-    .announcement-item {
-        border: 1px solid #e3e6f0;
-        border-radius: 8px;
-        padding: 1.25rem;
-        margin-bottom: 1rem;
-        background: white;
-        transition: box-shadow 0.15s ease;
-        border-left: 4px solid;
-    }
-    
-    .announcement-item.active {
-        border-left-color: #28a745;
-    }
-    
-    .announcement-item.inactive {
-        border-left-color: #6c757d;
-    }
-    
-    .announcement-item:hover {
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-    }
-    
-    .action-buttons .btn {
-        margin: 0 0.2rem;
-    }
-</style>
+<!-- Custom CSS for announcement management -->
+<link rel="stylesheet" href="css/manage-announcement.css">
 
 <div class="container-fluid mt-4">
     <!-- Header -->
@@ -109,6 +83,9 @@ $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at D
         switch($_GET['msg']) {
             case 'created':
                 $msg = 'Announcement has been created successfully!';
+                break;
+            case 'updated':
+                $msg = 'Announcement has been updated successfully!';
                 break;
             case 'deleted':
                 $msg = 'Announcement has been deleted successfully.';
@@ -153,50 +130,47 @@ $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at D
             $announcements->data_seek(0);
         }
         ?>
+        
+        <!-- Total Announcements Card -->
         <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-start border-primary border-4 shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Announcements</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $total_announcements ?></div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-bullhorn fa-2x text-primary"></i>
-                        </div>
+            <div class="card shadow-sm border-0 h-100 stats-card total-card">
+                <div class="card-body d-flex align-items-center">
+                    <div class="stats-icon bg-primary bg-gradient me-3">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="stats-label">Total Announcements</div>
+                        <div class="stats-number"><?= $total_announcements ?></div>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <!-- Active Announcements Card -->
         <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-start border-success border-4 shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Active Announcements</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $active_count ?></div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-check-circle fa-2x text-success"></i>
-                        </div>
+            <div class="card shadow-sm border-0 h-100 stats-card active-card">
+                <div class="card-body d-flex align-items-center">
+                    <div class="stats-icon bg-success bg-gradient me-3">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="stats-label">Active Announcements</div>
+                        <div class="stats-number"><?= $active_count ?></div>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <!-- Expired Announcements Card -->
         <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-start border-warning border-4 shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Expired Announcements</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $expired_count ?></div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-clock fa-2x text-warning"></i>
-                        </div>
+            <div class="card shadow-sm border-0 h-100 stats-card expired-card">
+                <div class="card-body d-flex align-items-center">
+                    <div class="stats-icon bg-warning bg-gradient me-3">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="stats-label">Expired Announcements</div>
+                        <div class="stats-number"><?= $expired_count ?></div>
                     </div>
                 </div>
             </div>
@@ -204,7 +178,7 @@ $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at D
     </div>
     <!-- Create New Announcement Form -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3" style="background-color: hsl(217, 65.90%, 25.30%); color: white;">
+        <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-white">
                 <i class="fas fa-plus me-2"></i>Create New Announcement
             </h6>
@@ -251,7 +225,7 @@ $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at D
     </div>
     <!-- Announcements List -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3" style="background-color: hsl(217, 65.90%, 25.30%); color: white;">
+        <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-white">
                 <i class="fas fa-list me-2"></i>All Announcements (<?= $total_announcements ?>)
             </h6>
@@ -286,24 +260,21 @@ $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at D
                                     </a>
                                     
                                     <?php if($row['is_active']): ?>
-                                        <a href="?action=deactivate&id=<?= $row['id'] ?>" 
-                                           class="btn btn-warning btn-sm" title="Deactivate"
-                                           onclick="return confirm('Are you sure you want to deactivate this announcement?')">
+                                        <button onclick="deactivateAnnouncement(<?= $row['id'] ?>)" 
+                                           class="btn btn-warning btn-sm" title="Deactivate">
                                             <i class="fas fa-eye-slash"></i>
-                                        </a>
+                                        </button>
                                     <?php else: ?>
-                                        <a href="?action=activate&id=<?= $row['id'] ?>" 
-                                           class="btn btn-success btn-sm" title="Activate"
-                                           onclick="return confirm('Are you sure you want to activate this announcement?')">
+                                        <button onclick="activateAnnouncement(<?= $row['id'] ?>)" 
+                                           class="btn btn-success btn-sm" title="Activate">
                                             <i class="fas fa-eye"></i>
-                                        </a>
+                                        </button>
                                     <?php endif; ?>
                                     
-                                    <a href="?action=delete&id=<?= $row['id'] ?>" 
-                                       class="btn btn-danger btn-sm" title="Delete"
-                                       onclick="return confirm('Are you sure you want to delete this announcement? This action cannot be undone.')">
+                                    <button onclick="deleteAnnouncement(<?= $row['id'] ?>)" 
+                                       class="btn btn-danger btn-sm" title="Delete">
                                         <i class="fas fa-trash"></i>
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -319,5 +290,164 @@ $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at D
         </div>
     </div>
 </div>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Function to activate announcement
+function activateAnnouncement(id) {
+    Swal.fire({
+        title: 'Activate Announcement?',
+        text: 'This announcement will become visible to students.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-eye me-1"></i>Yes, Activate',
+        cancelButtonText: '<i class="fas fa-times me-1"></i>Cancel',
+        customClass: {
+            confirmButton: 'btn btn-success me-2',
+            cancelButton: 'btn btn-secondary'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading
+            Swal.fire({
+                title: 'Activating...',
+                text: 'Please wait while we activate the announcement.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Redirect to activate
+            window.location.href = '?action=activate&id=' + id;
+        }
+    });
+}
+
+// Function to deactivate announcement
+function deactivateAnnouncement(id) {
+    Swal.fire({
+        title: 'Deactivate Announcement?',
+        text: 'This announcement will be hidden from students.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ffc107',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-eye-slash me-1"></i>Yes, Deactivate',
+        cancelButtonText: '<i class="fas fa-times me-1"></i>Cancel',
+        customClass: {
+            confirmButton: 'btn btn-warning me-2',
+            cancelButton: 'btn btn-secondary'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading
+            Swal.fire({
+                title: 'Deactivating...',
+                text: 'Please wait while we deactivate the announcement.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Redirect to deactivate
+            window.location.href = '?action=deactivate&id=' + id;
+        }
+    });
+}
+
+// Function to delete announcement
+function deleteAnnouncement(id) {
+    Swal.fire({
+        title: 'Delete Announcement?',
+        text: 'This action cannot be undone! The announcement will be permanently removed.',
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-trash me-1"></i>Yes, Delete',
+        cancelButtonText: '<i class="fas fa-times me-1"></i>Cancel',
+        customClass: {
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-secondary'
+        },
+        buttonsStyling: false,
+        focusCancel: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading
+            Swal.fire({
+                title: 'Deleting...',
+                text: 'Please wait while we delete the announcement.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Redirect to delete
+            window.location.href = '?action=delete&id=' + id;
+        }
+    });
+}
+
+// Show success messages with SweetAlert2
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const msg = urlParams.get('msg');
+    
+    if (msg) {
+        let title = 'Success!';
+        let text = '';
+        let icon = 'success';
+        
+        switch(msg) {
+            case 'created':
+                text = 'Announcement has been created successfully!';
+                break;
+            case 'updated':
+                text = 'Announcement has been updated successfully!';
+                break;
+            case 'deleted':
+                text = 'Announcement has been deleted successfully.';
+                break;
+            case 'activated':
+                text = 'Announcement has been activated.';
+                break;
+            case 'deactivated':
+                text = 'Announcement has been deactivated.';
+                break;
+        }
+        
+        if (text) {
+            Swal.fire({
+                icon: icon,
+                title: title,
+                text: text,
+                confirmButtonColor: '#4e73df',
+                timer: 3000,
+                timerProgressBar: true,
+                showConfirmButton: true,
+                confirmButtonText: 'Great!'
+            }).then(() => {
+                // Clean URL after showing success message
+                window.history.replaceState({}, document.title, window.location.pathname);
+            });
+        }
+    }
+});
+</script>
 
 <?php include 'footer.php'; ?>
