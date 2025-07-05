@@ -145,6 +145,10 @@ $programs = $conn->query("SELECT program_code, program_name FROM programs ORDER 
                         <select name="year_level" class="form-select" required>
                             <option value="">-- Select Year --</option>
                             <option value="1st" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '1st') ? 'selected' : '' ?>>1st Year</option>
+                            <option value="2nd" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '2nd') ? 'selected' : '' ?>>2nd Year</option>
+                            <option value="3rd" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '3rd') ? 'selected' : '' ?>>3rd Year</option>
+                            <option value="4th" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '4th') ? 'selected' : '' ?>>4th Year</option>
+                            <option value="5th" <?= (isset($_POST['year_level']) && $_POST['year_level'] == '5th') ? 'selected' : '' ?>>5th Year</option>
 
                         </select>
                     </div>
