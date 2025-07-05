@@ -1,26 +1,20 @@
 <?php
-// Start session first
 session_start();
 
-// Include database connection
 include '../includes/db.php';
 
-// Check if student is logged in
 if(!isset($_SESSION['role']) || $_SESSION['role'] !== 'student'){
     header("Location: ../login.php");
     exit;
 }
 
-// Now include the navbar (after session and auth check)
 include 'navbar.php';
 ?>
 
-<!-- View Courses specific CSS -->
 <link rel="stylesheet" href="css/view-courses.css">
 
 <?php
 
-// Get student information including program
 $username = $_SESSION['username'];
 $stmt = $conn->prepare("SELECT id, program, year_level FROM students WHERE username = ?");
 $stmt->bind_param("s", $username);
@@ -29,14 +23,11 @@ $result = $stmt->get_result();
 $student = $result->fetch_assoc();
 $stmt->close();
 
-// Define the program variable
 $program = $student['program'];
 
 
 
-// Function to get normalized program code
 function getNormalizedProgramCode($conn, $programName) {
-    // Try exact match first
     $query = $conn->prepare("SELECT program_code FROM programs WHERE program_name = ?");
     $query->bind_param("s", $programName);
     $query->execute();
@@ -46,7 +37,6 @@ function getNormalizedProgramCode($conn, $programName) {
         return $result->fetch_assoc()['program_code'];
     }
     
-    // Try partial match
     $query = $conn->prepare("SELECT program_code FROM programs WHERE 
                             program_name LIKE ? OR ? LIKE CONCAT('%', program_name, '%')");
     $like_param = "%" . $programName . "%";
@@ -58,15 +48,12 @@ function getNormalizedProgramCode($conn, $programName) {
         return $result->fetch_assoc()['program_code'];
     }
     
-    // Last resort - first program
     $first = $conn->query("SELECT program_code FROM programs LIMIT 1");
     return ($first->num_rows > 0) ? $first->fetch_assoc()['program_code'] : '';
 }
 
-// Get the normalized program code
 $program_code = getNormalizedProgramCode($conn, $student['program']);
 
-// Use the same query structure as view-curriculum.php
 $query = "SELECT c.id, c.title, c.credits, pc.year_level, pc.academic_term, 
                  GROUP_CONCAT(pr.title SEPARATOR ', ') as prerequisites
           FROM program_course pc
@@ -96,20 +83,17 @@ $courses_query->execute();
 $courses_result = $courses_query->get_result();
 
 
-// Get enrolled courses for this student
 try {
     $enrolled_query = $conn->prepare("SELECT course_id FROM student_courses WHERE student_id = ?");
     $enrolled_query->bind_param("i", $student['id']);
     $enrolled_query->execute();
     $enrolled_result = $enrolled_query->get_result();
 
-    // Create an array of enrolled course IDs for easy checking
     $enrolled_courses = [];
     while ($enrolled_row = $enrolled_result->fetch_assoc()) {
         $enrolled_courses[] = $enrolled_row['course_id'];
     }
 } catch (Exception $e) {
-    // If there's an error (e.g., table doesn't exist), use an empty array
     echo "<div class='alert alert-warning'>Note: Unable to fetch enrollment status. " . $e->getMessage() . "</div>";
     $enrolled_courses = [];
 }
@@ -231,7 +215,6 @@ try {
 <?php include 'footer.php'; ?>
 
 <?php
-// Helper function to compare year levels
 function compareYearLevels($studentYear, $courseYear) {
     $yearOrder = [
         '1st' => 1,
@@ -244,11 +227,9 @@ function compareYearLevels($studentYear, $courseYear) {
         'Fourth' => 4
     ];
     
-    // If year level is stored as a number
     if (is_numeric($studentYear)) $studentYear = intval($studentYear);
     if (is_numeric($courseYear)) $courseYear = intval($courseYear);
     
-    // Convert numeric year to string format if needed
     if (is_int($studentYear)) {
         $studentYear = match($studentYear) {
             1 => '1st',
@@ -269,10 +250,8 @@ function compareYearLevels($studentYear, $courseYear) {
         };
     }
     
-    // Get the numeric value for comparison
     $studentYearValue = $yearOrder[$studentYear] ?? 1;
     $courseYearValue = $yearOrder[$courseYear] ?? 1;
     
-    // Return: 1 if student year > course year, 0 if equal, -1 if less
     return $studentYearValue <=> $courseYearValue;
 }
