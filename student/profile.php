@@ -131,6 +131,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <div id="passwordAlert" class="alert d-none" role="alert"></div>
                 <form id="changePasswordForm">
                     <div class="mb-3">
                         <label for="currentPassword" class="form-label">Current Password</label>
@@ -139,6 +140,7 @@
                     <div class="mb-3">
                         <label for="newPassword" class="form-label">New Password</label>
                         <input type="password" class="form-control" id="newPassword" required>
+                        <div class="form-text">Password must be at least 6 characters long</div>
                     </div>
                     <div class="mb-3">
                         <label for="confirmPassword" class="form-label">Confirm New Password</label>
@@ -148,7 +150,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary">Change Password</button>
+                <button type="button" class="btn btn-primary" id="changePasswordBtn">Change Password</button>
             </div>
         </div>
     </div>
@@ -231,5 +233,179 @@
     transform: scale(1.05);
 }
 </style>
+
+<!-- SweetAlert2 for better alerts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    const changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+    
+    changePasswordBtn.addEventListener('click', function() {
+        const currentPassword = document.getElementById('currentPassword').value.trim();
+        const newPassword = document.getElementById('newPassword').value.trim();
+        const confirmPassword = document.getElementById('confirmPassword').value.trim();
+        
+        // Client-side validation
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Information',
+                text: 'Please fill in all password fields.',
+                confirmButtonColor: 'hsl(217, 65.90%, 25.30%)'
+            });
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Password Too Short',
+                text: 'New password must be at least 6 characters long.',
+                confirmButtonColor: 'hsl(217, 65.90%, 25.30%)'
+            });
+            return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Passwords Don\'t Match',
+                text: 'New password and confirm password must match.',
+                confirmButtonColor: 'hsl(217, 65.90%, 25.30%)'
+            });
+            return;
+        }
+        
+        if (currentPassword === newPassword) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Same Password',
+                text: 'New password must be different from your current password.',
+                confirmButtonColor: 'hsl(217, 65.90%, 25.30%)'
+            });
+            return;
+        }
+        
+        // Show loading state
+        changePasswordBtn.disabled = true;
+        changePasswordBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Changing...';
+        
+        // Send request to backend
+        fetch('change-password.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                currentPassword: currentPassword,
+                newPassword: newPassword,
+                confirmPassword: confirmPassword
+            })
+        })
+        .then(response => {
+            // Check if response is ok
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text(); // Get as text first to debug
+        })
+        .then(textData => {
+            console.log('Raw response:', textData); // Debug log
+            try {
+                const data = JSON.parse(textData);
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Password Changed!',
+                        text: data.message,
+                        confirmButtonColor: 'hsl(217, 65.90%, 25.30%)',
+                        timer: 3000,
+                        timerProgressBar: true
+                    }).then(() => {
+                        // Reset form and close modal
+                        changePasswordForm.reset();
+                        changePasswordModal.hide();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Password Change Failed',
+                        text: data.message,
+                        confirmButtonColor: 'hsl(217, 65.90%, 25.30%)'
+                    });
+                }
+            } catch (parseError) {
+                console.error('JSON Parse Error:', parseError);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: 'Server returned invalid response: ' + textData.substring(0, 100),
+                    confirmButtonColor: 'hsl(217, 65.90%, 25.30%)'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Connection Error',
+                text: 'Unable to connect to server. Please try again.',
+                confirmButtonColor: 'hsl(217, 65.90%, 25.30%)'
+            });
+        })
+        .finally(() => {
+            // Reset button state
+            changePasswordBtn.disabled = false;
+            changePasswordBtn.innerHTML = 'Change Password';
+        });
+    });
+    
+    // Reset form when modal is closed
+    document.getElementById('changePasswordModal').addEventListener('hidden.bs.modal', function () {
+        changePasswordForm.reset();
+        changePasswordBtn.disabled = false;
+        changePasswordBtn.innerHTML = 'Change Password';
+    });
+    
+    // Add password strength indicator
+    const newPasswordInput = document.getElementById('newPassword');
+    newPasswordInput.addEventListener('input', function() {
+        const password = this.value;
+        const strength = getPasswordStrength(password);
+        
+        // Remove existing strength classes
+        this.classList.remove('border-danger', 'border-warning', 'border-success');
+        
+        // Add appropriate class based on strength
+        if (password.length === 0) {
+            return;
+        } else if (strength === 'weak') {
+            this.classList.add('border-danger');
+        } else if (strength === 'medium') {
+            this.classList.add('border-warning');
+        } else {
+            this.classList.add('border-success');
+        }
+    });
+    
+    function getPasswordStrength(password) {
+        if (password.length < 6) return 'weak';
+        
+        let score = 0;
+        if (password.length >= 8) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[a-z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+        
+        if (score < 3) return 'weak';
+        if (score < 4) return 'medium';
+        return 'strong';
+    }
+});
+</script>
 
 <?php include 'footer.php'; ?>
