@@ -20,6 +20,11 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin'){
         width: 220px;
         min-height: 100vh;
         padding: 1.5rem 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        overflow-y: auto;
     }
 
     .school-header {
@@ -116,6 +121,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin'){
         flex: 1;
         padding: 1.5rem;
         background: #f8fafc;
+        margin-left: 220px;
     }
 
     .hamburger {
@@ -179,6 +185,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin'){
         .main-content {
             width: 100%;
             padding-top: 4rem;
+            margin-left: 0;
         }
         
         .d-flex {
@@ -220,6 +227,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin'){
         <ul class="nav flex-column">
             <li class="nav-item"><a href="dashboard.php" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
             <li class="nav-item"><a href="calendar.php" class="nav-link"><i class="fas fa-calendar-alt"></i>Task Calendar</a></li>
+            <li class="nav-item"><a href="manage-announcements.php" class="nav-link"><i class="fas fa-bullhorn"></i>Manage Announcements</a></li>
             <li class="nav-item"><a href="manage-students.php" class="nav-link"><i class="fas fa-user-graduate"></i>Manage Students</a></li>
             <li class="nav-item"><a href="manage-courses.php" class="nav-link"><i class="fas fa-book"></i>Manage Courses</a></li>
             <li class="nav-item"><a href="view-curriculum.php" class="nav-link"><i class="fas fa-clipboard-list"></i>View Curriculum</a></li>

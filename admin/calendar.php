@@ -74,7 +74,7 @@ if(isset($_POST['update_task_status'])) {
         $error_message = "Error updating task status: " . $conn->error;
     }
 }
-// for Fetch task
+// forFetch task
 $tasks_for_calendar = [];
 $admin_id = isset($_SESSION['id']) ? $_SESSION['id'] : 1;
 
