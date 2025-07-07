@@ -381,6 +381,132 @@
     font-size: 0.875rem;
 }
 
+/* Search Functionality Styles */
+.search-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    padding-right: 2.5rem !important;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.search-input:focus {
+    background: white;
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.15);
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #adb5bd;
+    font-style: italic;
+}
+
+.search-icon {
+    position: absolute;
+    right: 0.75rem;
+    color: #6c757d;
+    pointer-events: none;
+    transition: color 0.3s ease;
+}
+
+.search-input:focus + .search-icon {
+    color: #4e73df;
+}
+
+.search-btn {
+    background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%);
+    border: none;
+    padding: 0.6rem 1.2rem;
+    font-weight: 600;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(78, 115, 223, 0.3);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.search-btn:hover {
+    background: linear-gradient(135deg, #2e59d9 0%, #1e4bbd 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(78, 115, 223, 0.4);
+}
+
+.search-btn:active {
+    transform: translateY(0);
+}
+
+/* Enhanced search section styling */
+.search-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.search-section .form-label {
+    color: #495057;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.search-section .form-label i {
+    color: #4e73df;
+}
+
+.search-section .form-select {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.search-section .form-select:focus {
+    background: white;
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.15);
+}
+
+/* Active search/filter indicators */
+.search-section .form-control:not(:placeholder-shown),
+.search-section .form-select option:checked {
+    background: #e3f2fd;
+    border-color: #2196f3;
+}
+
+/* Search results highlighting */
+.search-highlight {
+    background: linear-gradient(120deg, #fff3cd 0%, #ffeaa7 100%);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.search-highlight strong {
+    color: #856404;
+    font-weight: 600;
+}
+
+/* Search term highlighting in results */
+.search-highlight-text {
+    background: linear-gradient(120deg, #fff3cd 0%, #ffeaa7 100%);
+    color: #856404;
+    padding: 0.1rem 0.2rem;
+    border-radius: 3px;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(255, 193, 7, 0.3);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .page-header {
@@ -508,4 +634,52 @@
         font-size: 0.8rem;
         margin-right: 0.5rem;
     }
+    
+    .search-section {
+        padding: 1rem;
+    }
+    
+    .search-section .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    .search-section .row > div:last-child {
+        margin-bottom: 0;
+    }
+    
+    .search-btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .search-input-group {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Search animation effects */
+@keyframes searchPulse {
+    0% { box-shadow: 0 0 0 0 rgba(78, 115, 223, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(78, 115, 223, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(78, 115, 223, 0); }
+}
+
+.search-input:focus {
+    animation: searchPulse 1.5s infinite;
+}
+
+/* Clear button styling */
+.btn-secondary-simple {
+    background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+    border: none;
+    color: white;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary-simple:hover {
+    background: linear-gradient(135deg, #545b62 0%, #495057 100%);
+    color: white;
+    transform: translateY(-1px);
 }

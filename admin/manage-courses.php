@@ -5,6 +5,7 @@
 
 <?php
 $program_filter = isset($_GET['program']) ? trim($_GET['program']) : '';
+$search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 $sort_by = isset($_GET['sort']) ? $_GET['sort'] : 'title';
 $sort_order = isset($_GET['order']) && $_GET['order'] === 'desc' ? 'desc' : 'asc';
 
@@ -19,12 +20,39 @@ $offset = ($page - 1) * $records_per_page;
 
 $count_query = "SELECT COUNT(DISTINCT c.id) as total FROM courses c";
 
+$where_conditions = [];
+$params = [];
+$types = '';
+
 if (!empty($program_filter)) {
-    $count_query .= " JOIN program_course pc ON c.id = pc.course_id 
-                WHERE pc.program_code = '" . $conn->real_escape_string($program_filter) . "'";
+    $where_conditions[] = "pc.program_code = ?";
+    $params[] = $program_filter;
+    $types .= 's';
 }
 
-$count_result = $conn->query($count_query);
+if (!empty($search_query)) {
+    $where_conditions[] = "(c.title LIKE ? OR c.description LIKE ? OR CAST(c.id AS CHAR) LIKE ?)";
+    $search_param = "%{$search_query}%";
+    $params = array_merge($params, [$search_param, $search_param, $search_param]);
+    $types .= 'sss';
+}
+
+if (!empty($program_filter)) {
+    $count_query .= " JOIN program_course pc ON c.id = pc.course_id";
+}
+
+if (!empty($where_conditions)) {
+    $count_query .= " WHERE " . implode(" AND ", $where_conditions);
+}
+
+if (!empty($params)) {
+    $count_stmt = $conn->prepare($count_query);
+    $count_stmt->bind_param($types, ...$params);
+    $count_stmt->execute();
+    $count_result = $count_stmt->get_result();
+} else {
+    $count_result = $conn->query($count_query);
+}
 $total_records = $count_result->fetch_assoc()['total'];
 $total_pages = ceil($total_records / $records_per_page);
 
@@ -35,13 +63,32 @@ if ($sort_by === 'year_level' || $sort_by === 'academic_term') {
     $query = "SELECT DISTINCT c.* FROM courses c";
 }
 
+$join_added = false;
+$where_conditions = [];
+$params = [];
+$types = '';
+
 if (!empty($program_filter)) {
     if ($sort_by === 'year_level' || $sort_by === 'academic_term') {
-        $query .= " WHERE pc.program_code = '" . $conn->real_escape_string($program_filter) . "'";
+        $where_conditions[] = "pc.program_code = ?";
     } else {
-        $query .= " JOIN program_course pc ON c.id = pc.course_id 
-                    WHERE pc.program_code = '" . $conn->real_escape_string($program_filter) . "'";
+        $query .= " JOIN program_course pc ON c.id = pc.course_id";
+        $join_added = true;
+        $where_conditions[] = "pc.program_code = ?";
     }
+    $params[] = $program_filter;
+    $types .= 's';
+}
+
+if (!empty($search_query)) {
+    $where_conditions[] = "(c.title LIKE ? OR c.description LIKE ? OR CAST(c.id AS CHAR) LIKE ?)";
+    $search_param = "%{$search_query}%";
+    $params = array_merge($params, [$search_param, $search_param, $search_param]);
+    $types .= 'sss';
+}
+
+if (!empty($where_conditions)) {
+    $query .= " WHERE " . implode(" AND ", $where_conditions);
 }
 
 if ($sort_by === 'year_level' || $sort_by === 'academic_term') {
@@ -51,7 +98,15 @@ if ($sort_by === 'year_level' || $sort_by === 'academic_term') {
 }
 
 $query .= " LIMIT $offset, $records_per_page";
-$result = $conn->query($query);
+
+if (!empty($params)) {
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else {
+    $result = $conn->query($query);
+}
 
 if (!$result) {
     echo "<p class='text-danger'>Failed to retrieve courses: " . $conn->error . "</p>";
@@ -100,10 +155,13 @@ function getCourseYearAndTerm($conn, $course_id) {
     return $data;
 }
 
-function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
+function buildPageUrl($page_num, $program_filter, $search_query, $sort_by, $sort_order) {
     $params = ['page' => $page_num];
     if (!empty($program_filter)) {
         $params['program'] = $program_filter;
+    }
+    if (!empty($search_query)) {
+        $params['search'] = $search_query;
     }
     if ($sort_by !== 'title') {
         $params['sort'] = $sort_by;
@@ -133,7 +191,15 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
 
     <div class="container">
         <div class="text-muted mb-3 small">
-            <?php if (!empty($program_filter)): ?>
+            <?php if (!empty($search_query)): ?>
+                <i class="fas fa-search me-1"></i>
+                Search results for "<strong><?= htmlspecialchars($search_query) ?></strong>"
+                <?php if (!empty($program_filter)): ?>
+                    in program "<strong><?= htmlspecialchars($program_filter) ?></strong>"
+                <?php endif; ?>
+                - Found <strong><?= $total_records ?></strong> course<?= ($total_records != 1) ? 's' : '' ?>
+                (Showing <?= $result_count ?> on page <?= $page ?> of <?= $total_pages ?>)
+            <?php elseif (!empty($program_filter)): ?>
                 <i class="fas fa-filter me-1"></i>
                 Found <strong><?= $total_records ?></strong> course<?= ($total_records != 1) ? 's' : '' ?> for program 
                 "<strong><?= htmlspecialchars($program_filter) ?></strong>" 
@@ -169,11 +235,14 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
                 </span>
                 
                 <?php
-                function getSortUrl($field, $current_sort, $current_order, $program_filter) {
+                function getSortUrl($field, $current_sort, $current_order, $program_filter, $search_query) {
                     $new_order = ($current_sort === $field && $current_order === 'asc') ? 'desc' : 'asc';
                     $params = ['sort' => $field, 'order' => $new_order];
                     if (!empty($program_filter)) {
                         $params['program'] = $program_filter;
+                    }
+                    if (!empty($search_query)) {
+                        $params['search'] = $search_query;
                     }
                     return '?' . http_build_query($params);
                 }
@@ -195,7 +264,7 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
                 
                 foreach ($sort_options as $field => $label):
                     $is_active = $sort_by === $field;
-                    $url = getSortUrl($field, $sort_by, $sort_order, $program_filter);
+                    $url = getSortUrl($field, $sort_by, $sort_order, $program_filter, $search_query);
                     $icon = getSortIcon($field, $sort_by, $sort_order);
                 ?>
                     <a href="<?= $url ?>" class="sort-link <?= $is_active ? 'active' : '' ?>">
@@ -207,11 +276,30 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
         </div>
 
         <div class="search-section">
-            <form method="GET" action="" class="row align-items-center">
+            <form method="GET" action="" class="row align-items-end">
                 <input type="hidden" name="sort" value="<?= htmlspecialchars($sort_by) ?>">
                 <input type="hidden" name="order" value="<?= htmlspecialchars($sort_order) ?>">
-                <div class="col-md-8">
-                    <label for="program_filter" class="form-label">Filter by Program:</label>
+                
+                <!-- Search Input -->
+                <div class="col-md-4">
+                    <label for="search" class="form-label fw-bold">
+                        <i class="fas fa-search me-1 text-primary"></i>Search Courses:
+                    </label>
+                    <div class="search-input-group">
+                        <input type="text" 
+                               name="search" 
+                               id="search" 
+                               class="form-control search-input" 
+                               placeholder="Search by title, description, or ID..."
+                               value="<?= htmlspecialchars($search_query) ?>">
+                    </div>
+                </div>
+                
+                <!-- Program Filter -->
+                <div class="col-md-4">
+                    <label for="program_filter" class="form-label fw-bold">
+                        <i class="fas fa-filter me-1 text-primary"></i>Filter by Program:
+                    </label>
                     <select name="program" id="program_filter" class="form-select">
                         <option value="">All Programs</option>
                         <?php
@@ -225,14 +313,16 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
                         <?php endwhile; ?>
                     </select>
                 </div>
-                <div class="col-md-4 mt-2 mt-md-0">
-                    <div class="d-flex gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary-simple">
-                            <i class="fas fa-filter me-1"></i>Filter
+                
+                <!-- Action Buttons -->
+                <div class="col-md-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary-simple search-btn">
+                            <i class="fas fa-search me-1"></i>Search & Filter
                         </button>
-                        <?php if(isset($_GET['program']) && !empty($_GET['program'])): ?>
-                            <a href="<?= buildPageUrl(1, '', $sort_by, $sort_order) ?>" class="btn btn-secondary-simple">
-                                <i class="fas fa-times me-1"></i>Clear
+                        <?php if(!empty($search_query) || !empty($program_filter)): ?>
+                            <a href="manage-courses.php" class="btn btn-secondary-simple">
+                                <i class="fas fa-times me-1"></i>Clear All
                             </a>
                         <?php endif; ?>
                     </div>
@@ -350,12 +440,12 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
                     <ul class="pagination modern-pagination">
                         <?php if ($page > 1): ?>
                             <li class="page-item">
-                                <a class="page-link" href="<?= buildPageUrl(1, $program_filter, $sort_by, $sort_order) ?>">
+                                <a class="page-link" href="<?= buildPageUrl(1, $program_filter, $search_query, $sort_by, $sort_order) ?>">
                                     <i class="fas fa-angle-double-left me-1"></i>First
                                 </a>
                             </li>
                             <li class="page-item">
-                                <a class="page-link" href="<?= buildPageUrl($page-1, $program_filter, $sort_by, $sort_order) ?>">
+                                <a class="page-link" href="<?= buildPageUrl($page-1, $program_filter, $search_query, $sort_by, $sort_order) ?>">
                                     <i class="fas fa-angle-left me-1"></i>Previous
                                 </a>
                             </li>
@@ -376,7 +466,7 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
                         for ($i = $start_page; $i <= $end_page; $i++):
                         ?>
                             <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                                <a class="page-link" href="<?= buildPageUrl($i, $program_filter, $sort_by, $sort_order) ?>">
+                                <a class="page-link" href="<?= buildPageUrl($i, $program_filter, $search_query, $sort_by, $sort_order) ?>">
                                     <?= $i ?>
                                 </a>
                             </li>
@@ -384,12 +474,12 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
 
                         <?php if ($page < $total_pages): ?>
                             <li class="page-item">
-                                <a class="page-link" href="<?= buildPageUrl($page+1, $program_filter, $sort_by, $sort_order) ?>">
+                                <a class="page-link" href="<?= buildPageUrl($page+1, $program_filter, $search_query, $sort_by, $sort_order) ?>">
                                     Next<i class="fas fa-angle-right ms-1"></i>
                                 </a>
                             </li>
                             <li class="page-item">
-                                <a class="page-link" href="<?= buildPageUrl($total_pages, $program_filter, $sort_by, $sort_order) ?>">
+                                <a class="page-link" href="<?= buildPageUrl($total_pages, $program_filter, $search_query, $sort_by, $sort_order) ?>">
                                     Last<i class="fas fa-angle-double-right ms-1"></i>
                                 </a>
                             </li>
@@ -411,7 +501,13 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
                 <i class="fas fa-book"></i>
                 <h5>No Courses Found</h5>
                 <p>
-                    <?php if (!empty($program_filter)): ?>
+                    <?php if (!empty($search_query) && !empty($program_filter)): ?>
+                        No courses found for search "<strong><?= htmlspecialchars($search_query) ?></strong>" in program "<strong><?= htmlspecialchars($program_filter) ?></strong>".
+                        <br>Try adjusting your search terms or selecting a different program.
+                    <?php elseif (!empty($search_query)): ?>
+                        No courses found for search "<strong><?= htmlspecialchars($search_query) ?></strong>".
+                        <br>Try different search terms or browse all courses.
+                    <?php elseif (!empty($program_filter)): ?>
                         No courses found for program "<strong><?= htmlspecialchars($program_filter) ?></strong>".
                         <br>Try selecting a different program or browse all courses.
                     <?php else: ?>
@@ -419,9 +515,9 @@ function buildPageUrl($page_num, $program_filter, $sort_by, $sort_order) {
                         <br>Start by adding your first course to the database.
                     <?php endif; ?>
                 </p>
-                <?php if (!empty($program_filter)): ?>
+                <?php if (!empty($search_query) || !empty($program_filter)): ?>
                     <a href="manage-courses.php" class="btn btn-primary-simple me-2">
-                        <i class="fas fa-list me-1"></i>View All
+                        <i class="fas fa-list me-1"></i>View All Courses
                     </a>
                 <?php endif; ?>
                 <a href="add-course.php" class="btn btn-success-simple">
@@ -479,8 +575,10 @@ function deleteCourse(id, title) {
 
 document.addEventListener('DOMContentLoaded', function() {
     const programSelect = document.querySelector('select[name="program"]');
+    const searchInput = document.querySelector('input[name="search"]');
     const filterForm = programSelect.closest('form');
     
+    // Style changes for program select
     programSelect.addEventListener('change', function() {
         if (this.value) {
             this.style.borderColor = '#4e73df';
@@ -491,10 +589,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Auto-submit on program change
     programSelect.addEventListener('change', function() {
         filterForm.submit();
     });
     
+    // Real-time search with debounce
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const searchValue = this.value.trim();
+        
+        if (searchValue.length >= 3 || searchValue.length === 0) {
+            searchTimeout = setTimeout(() => {
+                filterForm.submit();
+            }, 500); // 500ms debounce
+        }
+    });
+    
+    // Search input styling
+    searchInput.addEventListener('focus', function() {
+        this.style.borderColor = '#4e73df';
+        this.style.background = 'white';
+    });
+    
+    searchInput.addEventListener('blur', function() {
+        if (!this.value) {
+            this.style.borderColor = '#e9ecef';
+            this.style.background = '#f8f9fa';
+        }
+    });
+    
+    // Sort links loading animation
     const sortLinks = document.querySelectorAll('.sort-link');
     sortLinks.forEach(link => {
         link.addEventListener('click', function() {
@@ -504,7 +630,55 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Enhanced search form submission
+    filterForm.addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('.search-btn');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Searching...';
+            submitBtn.disabled = true;
+        }
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + F to focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+        }
+        
+        // Escape to clear search
+        if (e.key === 'Escape' && searchInput === document.activeElement) {
+            if (searchInput.value) {
+                searchInput.value = '';
+                filterForm.submit();
+            }
+        }
+    });
+    
+    // Highlight search terms in results
+    const searchTerm = '<?= htmlspecialchars($search_query) ?>';
+    if (searchTerm) {
+        highlightSearchTerms(searchTerm);
+    }
 });
+
+function highlightSearchTerms(term) {
+    if (!term || term.length < 2) return;
+    
+    const courseTitles = document.querySelectorAll('.course-title');
+    const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    
+    courseTitles.forEach(element => {
+        const originalText = element.textContent;
+        const highlightedText = originalText.replace(regex, '<mark class="search-highlight-text">$1</mark>');
+        if (highlightedText !== originalText) {
+            element.innerHTML = highlightedText;
+        }
+    });
+}
 </script>
 
 <?php include 'footer.php'; ?>
