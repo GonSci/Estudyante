@@ -1,5 +1,4 @@
 <?php
-// footer.php - Student Portal Footer
 ?>
 
 <footer class="mt-5 py-4" style="background-color: hsl(217, 65.90%, 25.30%); color: white;">

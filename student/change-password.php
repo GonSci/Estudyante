@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// JSON content type and security headers
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
