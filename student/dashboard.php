@@ -231,22 +231,22 @@ $announcements = $conn->query("
             <ul class="list-group list-group-flush">
                 <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                     <div>
-                        <span class="badge bg-primary rounded-pill me-2">Jun 30</span>
-                        <span class="fw-medium">End of Spring Semester</span>
+                        <span class="badge bg-primary rounded-pill me-2">July 30</span>
+                        <span class="fw-medium">Code Quest Event</span>
                     </div>
                     <i class="fas fa-calendar-check text-primary"></i>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                     <div>
-                        <span class="badge bg-success rounded-pill me-2">Jul 15</span>
+                        <span class="badge bg-success rounded-pill me-2">July 15</span>
                         <span class="fw-medium">Summer Workshop Begins</span>
                     </div>
                     <i class="fas fa-chalkboard-teacher text-success"></i>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                     <div>
-                        <span class="badge bg-info rounded-pill me-2">Aug 20</span>
-                        <span class="fw-medium">Fall Registration Deadline</span>
+                        <span class="badge bg-info rounded-pill me-2">August 1</span>
+                        <span class="fw-medium">Enrollment Period</span>
                     </div>
                     <i class="fas fa-clipboard-list text-info"></i>
                 </li>

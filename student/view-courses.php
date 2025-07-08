@@ -11,6 +11,7 @@ if(!isset($_SESSION['role']) || $_SESSION['role'] !== 'student'){
 include 'navbar.php';
 ?>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="css/view-courses.css">
 
 <?php
@@ -24,8 +25,6 @@ $student = $result->fetch_assoc();
 $stmt->close();
 
 $program = $student['program'];
-
-
 
 function getNormalizedProgramCode($conn, $programName) {
     $query = $conn->prepare("SELECT program_code FROM programs WHERE program_name = ?");
@@ -100,17 +99,30 @@ try {
 ?>
 
 <div class="container mt-4">
-    <!-- Page Header -->
     <div class="card mb-4 shadow-sm">
         <div class="card-header" style="background-color: hsl(217, 65.90%, 25.30%); color: white;">
             <div class="d-flex justify-content-between align-items-center">
                 <h4 class="mb-0"><i class="fas fa-book-open me-2"></i>Program Curriculum</h4>
-                <span class="badge bg-light text-dark"><?= htmlspecialchars($program) ?></span>
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="badge bg-light text-dark"><?= htmlspecialchars($program) ?></span>
+                    <button onclick="printCurriculum()" class="btn btn-light btn-sm no-print" id="printBtn">
+                        <i class="fas fa-print me-1"></i>Print Curriculum
+                    </button>
+                </div>
             </div>
         </div>
         <div class="card-body">
-            <p>Below is the curriculum for your program: <strong><?= htmlspecialchars($program) ?></strong>. 
+            <p class="no-print">Below is the curriculum for your program: <strong><?= htmlspecialchars($program) ?></strong>. 
                Your current year level is <strong><?= htmlspecialchars($student['year_level']) ?></strong>.</p>
+            
+            <div class="print-only print-header">
+                <div class="text-center mb-4">
+                    <div class="institution-header">
+                        <h2>CURRICULUM - <?= htmlspecialchars($program) ?></h2>
+                    </div>
+                    <hr class="header-divider">
+                </div>
+            </div>
             
             <?php if ($courses_result->num_rows > 0): ?>
                 <div class="table-responsive">
@@ -132,7 +144,6 @@ try {
                             $year_row_counts = [];
                             $term_row_counts = [];
                             
-                            // First pass to count rows for each year and term
                             $courses_copy = [];
                             while ($row = $courses_result->fetch_assoc()) {
                                 $courses_copy[] = $row;
@@ -149,13 +160,11 @@ try {
                                 $term_row_counts[$term_key]++;
                             }
                             
-                            // Display the data
                             foreach ($courses_copy as $row): 
                                 $year_changed = ($current_year != $row['year_level']);
                                 $term_changed = ($current_term != $row['academic_term'] || $year_changed);
                                 $term_key = $row['year_level'] . '_' . $row['academic_term'];
                                 
-                                // Track if this is the first row of a new term
                                 $is_new_term = $term_changed && !$year_changed;
                             ?>
                                 <tr <?= $is_new_term ? 'class="term-transition"' : '' ?>>
@@ -211,6 +220,113 @@ try {
         </div>
     </div>
 </div>
+
+<script>
+function printCurriculum() {
+    const printBtn = document.getElementById('printBtn');
+    
+    if (printBtn) {
+        const originalText = printBtn.innerHTML;
+        printBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Preparing Print...';
+        printBtn.disabled = true;
+        
+        setTimeout(() => {
+            printBtn.innerHTML = originalText;
+            printBtn.disabled = false;
+        }, 3000);
+    }
+    
+    document.body.classList.add('printing');
+    
+    preparePrintDocument();
+    
+    setTimeout(() => {
+        window.print();
+        
+        document.body.classList.remove('printing');
+    }, 200);
+}
+
+function preparePrintDocument() {
+    const originalTitle = document.title;
+    document.title = `Curriculum_${<?= json_encode($program) ?>}_StudentID_${<?= json_encode($student['id']) ?>}_${new Date().toISOString().split('T')[0]}`;
+    
+    console.log('Document prepared for printing');
+}
+
+window.addEventListener('beforeprint', function() {
+    document.body.classList.add('print-mode');
+    
+    const dynamicElements = document.querySelectorAll('.dynamic-content');
+    dynamicElements.forEach(el => el.style.display = 'none');
+});
+
+window.addEventListener('afterprint', function() {
+    document.body.classList.remove('print-mode');
+    document.title = 'View Courses - Student Registration System';
+    
+    const dynamicElements = document.querySelectorAll('.dynamic-content');
+    dynamicElements.forEach(el => el.style.display = '');
+    
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Print Complete!',
+            text: 'Your curriculum has been sent to the printer.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end'
+        });
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        printCurriculum();
+    }
+    
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'P') {
+        e.preventDefault();
+        window.print();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const printStyles = document.querySelector('style');
+    if (printStyles && printStyles.textContent.includes('@media print')) {
+        console.log('Print styles loaded successfully');
+    }
+    
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) {
+        printBtn.title = 'Print curriculum (Ctrl+P)';
+        
+        printBtn.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        printBtn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    }
+});
+
+function optimizePrintLayout() {
+    const tables = document.querySelectorAll('.table');
+    tables.forEach(table => {
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach((row, index) => {
+            if (index > 0 && index % 15 === 0) {
+                row.style.pageBreakBefore = 'auto';
+            }
+        });
+    });
+}
+
+window.addEventListener('beforeprint', optimizePrintLayout);
+</script>
 
 <?php include 'footer.php'; ?>
 
