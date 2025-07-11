@@ -1,4 +1,4 @@
-# Student Registration System
+# Student Information System
 
 <div align="center">
   <img src="assets/login_logo_white.png" alt="Summit Crest Academy Logo" width="120" />
@@ -13,7 +13,6 @@
 - [System Requirements](#-system-requirements)
 - [Installation](#-installation)
 - [Database Setup](#-database-setup)
-- [Project Structure](#-project-structure)
 - [User Roles](#-user-roles)
 - [Screenshots](#-screenshots)
 
