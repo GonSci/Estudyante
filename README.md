@@ -6,7 +6,7 @@
   <p><em>We rise by knowledge, We lead by heart</em></p>
 </div>
 
-## 📋 Table of Contents
+##  Table of Contents
 - [Overview](#-overview)
 - [Features](#-features)
 - [Technologies Used](#-technologies-used)
@@ -16,7 +16,7 @@
 - [User Roles](#-user-roles)
 - [Screenshots](#-screenshots)
 
-## 🎯 Overview
+##  Overview
 
 The **Student Registration System** is a comprehensive web-based application designed for **Summit Crest Academy** to manage student information, course enrollment, academic records, and payment tracking. The system provides separate interfaces for administrators and students, ensuring efficient management of academic operations.
 
@@ -27,15 +27,15 @@ The **Student Registration System** is a comprehensive web-based application des
 - Facilitate payment tracking and receipt generation
 - Support multi-user roles with appropriate permissions
 
-## ✨ Features
+##  Features
 
-### 🔐 Authentication & Security
+###  Authentication & Security
 - **Secure Login System** with role-based access control
 - **Session Management** with proper timeout handling
 - **User Role Separation** (Admin/Student)
 - **Input Validation** and SQL injection prevention
 
-### 👨‍💼 Admin Dashboard
+###  Admin Dashboard
 - **Comprehensive Dashboard** with real-time statistics
 - **Student Management**
   - Add, edit, and delete student records
@@ -62,7 +62,7 @@ The **Student Registration System** is a comprehensive web-based application des
   - Monthly registration trends
   - Interactive charts and visualizations
 
-### 👨‍🎓 Student Portal
+###  Student Portal
 - **Personal Dashboard** with academic overview
 - **Profile Management**
   - View and update personal information
@@ -79,7 +79,7 @@ The **Student Registration System** is a comprehensive web-based application des
   - Payment status monitoring
 - **Announcements** - View important notices
 
-## 🛠 Technologies Used
+##  Technologies Used
 
 ### Frontend
 - **HTML5** & **CSS3** with modern responsive design
@@ -100,7 +100,7 @@ The **Student Registration System** is a comprehensive web-based application des
 - **phpMyAdmin** for database administration
 - **VS Code** as the primary IDE
 
-## 📋 System Requirements
+##  System Requirements
 
 ### Server Requirements
 - **Web Server:** Apache 2.4+ (included in XAMPP)
@@ -114,7 +114,7 @@ The **Student Registration System** is a comprehensive web-based application des
 - **JavaScript:** Enabled
 - **Screen Resolution:** 1024x768 minimum (responsive design)
 
-## 🚀 Installation
+##  Installation
 
 ### Prerequisites
 1. Install [XAMPP](https://www.apachefriends.org/download.html) on your system
@@ -165,7 +165,7 @@ The **Student Registration System** is a comprehensive web-based application des
    http://localhost/Student_Registration_System/
    ```
 
-## 🗄 Database Setup
+##  Database Setup
 
 ### Required Tables Structure
 
@@ -192,9 +192,9 @@ The system works best with sample data including:
 - Payment types
 - Admin user account
 
-## 👥 User Roles
+##  User Roles
 
-### 🔑 Administrator
+###  Administrator
 **Default Access:** Full system control
 - **Username:** admin
 - **Capabilities:**
@@ -205,7 +205,7 @@ The system works best with sample data including:
   - System announcements
   - Analytics and reporting
 
-### 🎓 Student
+###  Student
 **Access:** Personal academic information
 - **Login:** Individual credentials
 - **Capabilities:**
@@ -215,7 +215,7 @@ The system works best with sample data including:
   - Announcement viewing
   - Password management
 
-## 🖼 Screenshots
+##  Screenshots
 
 ### Admin Dashboard
 ![Admin Dashboard](assets/admin-dashboard.png)
